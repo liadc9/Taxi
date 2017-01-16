@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     // parse the driver data
     parsedData = parse.DataSplit(driverString);
 
-    //create status for sriver
+    //create status for driver
     Status stat;
 
     // properly receive all data from parser

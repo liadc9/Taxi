@@ -87,7 +87,7 @@ public:
 
     virtual int closeData() = 0;
 
-
+    virtual int acceptOneClient() = 0;
 
 };
 #endif //TAXI_SOCKET_H

@@ -44,8 +44,8 @@ BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
  * @return null;
  */
 int main(int argc, char *argv[]) {
-    Socket* socket = new Udp(true, IP, atoi(argv[1]));
-    socket->initialize();
+   /* Socket* socket = new Udp(true, IP, atoi(argv[1]));
+    socket->initialize();*/
     char buffer[1024];
 
     // get grid input from user

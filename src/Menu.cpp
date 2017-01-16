@@ -26,6 +26,8 @@
 #include "ITaxiCab.h"
 #include <boost/serialization/vector.hpp>
 #include "BFS.h"
+#include "sockets/Tcp.h"
+#include "Data.h"
 
 
 using namespace std;
@@ -390,5 +392,23 @@ void Menu:: online(Grid* grid, Socket* socket) {
         taxiCenter->getTrips().pop_back();
     }
     delete taxiCenter;
+
+}
+
+void* mainThread(void* info){
+    Socket* server = new Tcp(true, 1212);
+    server->initialize();
+    Data* data;
+    data = (Data*)info;
+    for(int i = 0; i < data->getNumOfDrivers(); i++){
+        pthread_t t1;
+        int clientNum = server->acceptOneClient();
+        data->setAccept(clientNum);
+        data->setSocket(server);
+        int status = pthread_create(&t1,NULL,clientRiciever,(void*)data);
+    }
+ }
+
+void* clientRiciever(void* info){
 
 }
