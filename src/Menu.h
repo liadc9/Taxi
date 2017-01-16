@@ -14,7 +14,6 @@ public:
     void online(Grid* grid,Socket* socket);
     void* mainThread(void* info);
     void* clientRiciever(void* info);
-
 };
 
 

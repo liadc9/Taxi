@@ -28,34 +28,9 @@
 #include "BFS.h"
 #include "sockets/Tcp.h"
 #include "Data.h"
-
+#include <pthread.h>
 
 using namespace std;
-int id;
-int age;
-char status;
-int expirience;
-int vehicle;
-int xStart;
-int yStart;
-int xEnd;
-int yEnd;
-int numPassengers;
-double tariff;
-int taxi_type;
-char manufacturer;
-char color;
-int taxiID;
-int timeOfStart;
-
-
-
-
-// creates new parser object
-Parser parse;
-
-// create a list of char data
-vector<boost::any> parsedData;
 
 /**
  * costrcutor for the menu
@@ -75,14 +50,34 @@ Menu:: Menu(){
  * @param grid - our given grid created in main.
  */
 void Menu:: online(Grid* grid, Socket* socket) {
+// creates new parser object
+    Parser parse;
+// create a list of char data
+    vector<boost::any> parsedData;
+    pthread_t first;
+    int id;
+    int age;
+    char status;
+    int expirience;
+    int xStart;
+    int yStart;
+    int xEnd;
+    int yEnd;
+    int numPassengers;
+    double tariff;
+    int taxi_type;
+    char manufacturer;
+    char color;
+    int taxiID;
+    int timeOfStart;
     int x;
+    int choice = 0;
     // start time for the trip
     int startTime;
     // string for serialization
     string serial_str;
     Driver *driver;
     Driver* driver1;
-    int choice = 0;
     TaxiCenter *taxiCenter;
     taxiCenter = new TaxiCenter();
     // timer used in process online
@@ -103,82 +98,12 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
-
-                // for each driver in each client send of buffer deserialize into driver.
-                for(int i = 0; i < choice; i++) {
-                    Driver *driver = new Driver(0, 0, 0, 0,NULL,
-                            Marride,NULL, false, 0);
-                    socket->reciveData(buffer, sizeof(buffer));
-
-                    /*
-                     * deserialize buffer into driver object
-                     */
-                    string serial_str(buffer, sizeof(buffer));
-                    boost::iostreams::basic_array_source<char> device(serial_str.c_str(),
-                                                                      serial_str.size());
-                    boost::iostreams::stream<boost::iostreams::basic_array_source<char> >
-                            s2(device);
-                    boost::archive::binary_iarchive ia(s2);
-                    ia >> driver;
-                    serial_str.clear();
-                    //put the driver at taxicenter
-                    taxiCenter->AddDriver(driver);
-                    Status stat;
-                    double satisfaction = 0;
-                    //assign the driver the correct taxi according to vehicle id
-                    for (int i = 0; i < taxiCenter->getTaxis().size(); i++) {
-                        if (taxiCenter->getTaxis().at(i)->getCab_ID() == vehicle) {
-                            driver->setTaxiCabInfo(taxiCenter->getTaxis().at(i));
-                            // now the cab has a driver
-                            taxiCenter->getTaxis().at(i)->setHasDriver(true);
-                          //  taxiCenter->AddDriver(driver1);
-
-                            /*
-                             * serialize ItaxiCab into buffer in order to send to client
-                             */
-                            ITaxiCab* cab = driver->getTaxiCabInfo();
-                            std::string serial_str;
-                            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                            boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> >
-                                    s(inserter);
-                            boost::archive::binary_oarchive oa(s);
-                            oa << cab;
-                            s.flush();
-                            socket->sendData(serial_str);
-                            serial_str.clear();
-                        }
-                    }
-                    //assign the driver the correct taxi according to vehicle id
-                    for (int i = 0; i < taxiCenter->getLuxTaxis().size(); i++) {
-                        if (taxiCenter->getLuxTaxis().at(i)->getCab_ID() == vehicle) {
-                            driver->setTaxiCabInfo(taxiCenter->getLuxTaxis().at(i));
-                            // now the cab has a driver
-                            taxiCenter->getLuxTaxis().at(i)->setHasDriver(true);
-                            /*
-                             * serialize ItaxiCab into buffer in order to send to client
-                             */
-                            ITaxiCab* cab = driver->getTaxiCabInfo();
-                            std::string serial_str;
-                            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                            boost::iostreams::stream<boost::iostreams::
-                            back_insert_device<std::string> > s(inserter);
-                            boost::archive::binary_oarchive oa(s);
-                            oa << cab;
-                            s.flush();
-                            socket->sendData(serial_str);
-                            serial_str.clear();
-
-                        }
-                    }
-
+                Data* information = new Data(choice,taxiCenter,1212,NULL,0);
+                int status = pthread_create(&first,NULL,mainThread,(void*)information);
+                if(status){
+                    //error
                 }
-                /*
-                 * deserialize buffer into string "waiting for move"
-                 */
-                string ss;
-                socket->reciveData(buffer, sizeof(buffer));
-                std::string receive(buffer, sizeof(buffer));
-                break;
+
 
             }
             // create a trip
@@ -395,7 +320,7 @@ void Menu:: online(Grid* grid, Socket* socket) {
 
 }
 
-void* mainThread(void* info){
+void* Menu::mainThread(void* info){
     Socket* server = new Tcp(true, 1212);
     server->initialize();
     Data* data;
@@ -405,10 +330,87 @@ void* mainThread(void* info){
         int clientNum = server->acceptOneClient();
         data->setAccept(clientNum);
         data->setSocket(server);
-        int status = pthread_create(&t1,NULL,clientRiciever,(void*)data);
+        int status1 = pthread_create(&t1,NULL,clientRiciever,(void*)data);
     }
- }
+    return NULL;
+}
 
-void* clientRiciever(void* info){
+void* Menu::clientRiciever(void* info){
+    char buffer[1024];
+    Data* data;
+    data = (Data*)info;
+    Socket* serv = data->getSocket();
+    TaxiCenter* center = data->getTaxiCenter();
+    Driver *driver = new Driver(0, 0, 0, 0,NULL,
+                                Marride,NULL, false, 0);
+    serv->reciveData(buffer, sizeof(buffer));
+    /*
+     * deserialize buffer into driver object
+     */
+    string serial_str(buffer, sizeof(buffer));
+    boost::iostreams::basic_array_source<char> device(serial_str.c_str(),
+                                                      serial_str.size());
+    boost::iostreams::stream<boost::iostreams::basic_array_source<char> >
+            s2(device);
+    boost::archive::binary_iarchive ia(s2);
+    ia >> driver;
+    serial_str.clear();
+    //add driver to taxicenter
+    /*do lock mutex*/
+    center->AddDriver(driver);
+    /*do unlock mutex*/
+
+    //assign the driver the correct taxi according to Taxi id
+    for (int i = 0; i < center->getTaxis().size(); i++) {
+        if (center->getTaxis().at(i)->getCab_ID() == driver->getTaxiID()) {
+            driver->setTaxiCabInfo(center->getTaxis().at(i));
+            // now the cab has a driver
+            center->getTaxis().at(i)->setHasDriver(true);
+            //  taxiCenter->AddDriver(driver1);
+
+            /*
+             * serialize ItaxiCab into buffer in order to send to client
+             */
+            ITaxiCab* cab = driver->getTaxiCabInfo();
+            std::string serial_str;
+            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+            boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> >
+                    s(inserter);
+            boost::archive::binary_oarchive oa(s);
+            oa << cab;
+            s.flush();
+            serv->sendData(serial_str);
+            serial_str.clear();
+        }
+    }
+    //assign the driver the correct taxi according to Taxi id
+    for (int i = 0; i < center->getLuxTaxis().size(); i++) {
+        if (center->getLuxTaxis().at(i)->getCab_ID() == driver->getTaxiID()) {
+            driver->setTaxiCabInfo(center->getLuxTaxis().at(i));
+            // now the cab has a driver
+            center->getLuxTaxis().at(i)->setHasDriver(true);
+            /*
+             * serialize ItaxiCab into buffer in order to send to client
+             */
+            ITaxiCab* cab = driver->getTaxiCabInfo();
+            std::string serial_str;
+            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+            boost::iostreams::stream<boost::iostreams::
+            back_insert_device<std::string> > s(inserter);
+            boost::archive::binary_oarchive oa(s);
+            oa << cab;
+            s.flush();
+            serv->sendData(serial_str);
+            serial_str.clear();
+        }
+    }
+    /*
+     * deserialize buffer into string "waiting for move"
+     */
+    string ss;
+    serv->reciveData(buffer, sizeof(buffer));
+    std::string receive(buffer, sizeof(buffer));
+
+
 
 }
