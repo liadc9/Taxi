@@ -489,7 +489,7 @@ void* Menu::clientRiciever(void* info){
     return NULL;
 }
 
-void* tripRoute(void* info){
+void* Menu::tripRoute(void* info){
     Trip* trip;
     trip = (Trip*) info;
     BFS* bfs = new BFS(trip);
