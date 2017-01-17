@@ -225,6 +225,7 @@ void Menu:: online(Grid* grid, int port) {
 
                 // no default requirement
         }
+    }
         // remove all taxis from memory if 7 is pressed
         for (int i = taxiCenter->getTaxis().size(); i > 0; i--) {
             StandardCab *cab = taxiCenter->getTaxis().at(i - 1);
@@ -253,8 +254,6 @@ void Menu:: online(Grid* grid, int port) {
             taxiCenter->getTrips().pop_back();
         }
         delete taxiCenter;
-
-    }
 }
 
 void* Menu::mainThread(void* info){
