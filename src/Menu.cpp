@@ -364,8 +364,7 @@ void* Menu::clientRiciever(void* info){
                         /*
                          * serialize route into buffer in order to send to client
                          */
-                        BFS* bfs = new BFS(trip);
-                        vector<Point> route = bfs->AlgoRun();
+                        vector<Point> route = trip->getRoute();
                         std::string serial_str;
                         boost::iostreams::back_insert_device<std::string> inserter(serial_str);
                         boost::iostreams::stream<boost::iostreams::
