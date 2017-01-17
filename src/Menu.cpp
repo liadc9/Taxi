@@ -297,7 +297,7 @@ void* Menu::clientRiciever(void *info){
     TaxiCenter* center = data->getTaxiCenter();
     Driver *driver = new Driver(0, 0, 0, 0,NULL,
                                 Marride,NULL, false, 0);
-    serv->receiveData(buffer, sizeof(buffer));
+    serv->receiveData(buffer, sizeof(buffer), 0);
     /*
      * deserialize buffer into driver object
      */
@@ -335,7 +335,7 @@ void* Menu::clientRiciever(void *info){
             boost::archive::binary_oarchive oa(s);
             oa << cab;
             s.flush();
-            serv->sendData(serial_str);
+            serv->sendData(serial_str, 0);
             serial_str.clear();
         }
     }
@@ -359,7 +359,7 @@ void* Menu::clientRiciever(void *info){
             boost::archive::binary_oarchive oa(s);
             oa << cab;
             s.flush();
-            serv->sendData(serial_str);
+            serv->sendData(serial_str, 0);
             serial_str.clear();
         }
     }
@@ -370,7 +370,7 @@ void* Menu::clientRiciever(void *info){
          * deserialize buffer into string "waiting for move"
          */
         string ss;
-        serv->receiveData(buffer, sizeof(buffer));
+        serv->receiveData(buffer, sizeof(buffer), data->getAccept());
         std::string receive(buffer, sizeof(buffer));
 
         if(choice == 9){
@@ -414,7 +414,7 @@ void* Menu::clientRiciever(void *info){
                         boost::archive::binary_oarchive oa(s);
                         oa << route;
                         s.flush();
-                        serv->sendData(serial_str);
+                        serv->sendData(serial_str, data->getAccept());
                         tripTime = route.size();
                         startTime = trip->getTimeOfStart();
                         break;
@@ -445,9 +445,9 @@ void* Menu::clientRiciever(void *info){
                 boost::archive::binary_oarchive oa(s);
                 oa << position;
                 s.flush();
-                serv->sendData(serial_str);
+                serv->sendData(serial_str, data->getAccept());
                 serial_str.clear();
-                serv->receiveData(buffer, sizeof(buffer));
+                serv->receiveData(buffer, sizeof(buffer), data->getAccept());
             }
             //if we have reached end of route for the driver
             if(timer <= (tripTime + startTime) && driver->isOnTrip() == true){
@@ -472,7 +472,7 @@ void* Menu::clientRiciever(void *info){
     * deserialize buffer into string "waiting for move"
     */
     string ss;
-    serv->receiveData(buffer, sizeof(buffer));
+    serv->receiveData(buffer, sizeof(buffer), data->getAccept());
     std::string receive(buffer, sizeof(buffer));
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
@@ -482,7 +482,7 @@ void* Menu::clientRiciever(void *info){
     boost::archive::binary_oarchive oa(s);
     oa << endTransmission;
     s.flush();
-    serv->sendData(serial_str);
+    serv->sendData(serial_str, data->getAccept());
     //close the socket
     delete socket;
 
