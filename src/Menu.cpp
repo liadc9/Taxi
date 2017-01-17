@@ -1,5 +1,5 @@
 /**
- * The following class is used to hold all posssible menu options class - gAL KING
+ * The following class is used to hold all posssible menu options class - gAL
  */
 #include <iostream>
 #include <fstream>
