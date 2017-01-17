@@ -128,7 +128,7 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 Trip *trip = new Trip(id, start, end, grid, numPassengers,
                                       tariff, timeOfStart, false);
                 taxiCenter->AddTrip(trip);
-
+    //mutex//
                 int bfsStatus = pthread_create(&first, NULL, tripRoute, (void *) trip);
                 if (bfsStatus) {
                     //error
@@ -276,6 +276,9 @@ void* Menu::clientRiciever(void* info){
     int tripTime;
     int startTime;
     int z;
+    int xCor;
+    int yCor;
+    int first =0;
     Data* data;
     data = (Data*)info;
     Socket* serv = data->getSocket();
@@ -297,7 +300,6 @@ void* Menu::clientRiciever(void* info){
     //add driver to taxicenter
     /*do lock mutex*/
     center->AddDriver(driver);
-
 
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getTaxis().size(); i++) {
@@ -343,21 +345,33 @@ void* Menu::clientRiciever(void* info){
             serial_str.clear();
         }
     }
-    /*
-     * deserialize buffer into string "waiting for move"
-     */
-    string ss;
-    serv->reciveData(buffer, sizeof(buffer));
-    std::string receive(buffer, sizeof(buffer));
-
+    xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
+    yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
     while(choice != 7){
+        /*
+         * deserialize buffer into string "waiting for move"
+         */
+        string ss;
+        serv->reciveData(buffer, sizeof(buffer));
+        std::string receive(buffer, sizeof(buffer));
+
         if(choice == 9){
             //if driver has no trip and it is time for a trip to begin assign driver a trip
             if (driver->isOnTrip() == false ) {
                 for (int i = 0; i < center->getTrips().size(); i++) {
                     if (center->getTrips().at(i)->getHappening() == false) {
-                        trip = center->getTrips().at(i);
-                        z = i;
+                        if( first == 0){
+                            if (center->getTrips().at(i)->getRide_id() == driver->getId()){
+                                trip = center->getTrips().at(i);
+                                z = i;
+                                first++;
+                            }
+                        }
+                        else if(center->getTrips().at(i)->getStart()->getState().getX() == xCor &&
+                                center->getTrips().at(i)->getStart()->getState().getX() == yCor){
+                                trip = center->getTrips().at(i);
+                                z = i;
+                        }
                     }
                     if (trip->getTimeOfStart() == timer) {
                         driver->setOnTrip(true);
@@ -428,6 +442,5 @@ void* tripRoute(void* info){
     BFS* bfs = new BFS(trip);
     vector<Point> route = bfs->AlgoRun();
     trip->setRoute(route);
-
     return NULL;
 }

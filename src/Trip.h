@@ -33,8 +33,6 @@ private:
     int timeOfStart;
     bool happening;
     vector<Point> route;
-
-private:
     State* start;
     State* stop;
     Grid* grid;
