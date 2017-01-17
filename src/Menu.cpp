@@ -50,7 +50,7 @@ Menu:: Menu(){
  * press 7 to quit
  * @param grid - our given grid created in main.
  */
-void Menu:: online(Grid* grid, Socket* socket) {
+void Menu:: online(Grid* grid, int port) {
 // creates new parser object
     Parser parse;
 // create a list of char data
@@ -99,7 +99,7 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
-                Data *information = new Data(choice, taxiCenter, 1212, NULL, 0);
+                Data *information = new Data(choice, taxiCenter, port, NULL, 0);
                 int status = pthread_create(&first, NULL, mainThread, (void *) information);
                 if (status) {
                     //error
@@ -255,16 +255,21 @@ void Menu:: online(Grid* grid, Socket* socket) {
 }
 
 void* Menu::mainThread(void* info){
-    Socket* server = new Tcp(true, 1212);
-    server->initialize();
     Data* data;
     data = (Data*)info;
+    Socket* server = new Tcp(true, IP, data->getPort());
+    server->initialize();
+
+
     for(int i = 0; i < data->getNumOfDrivers(); i++){
         pthread_t t1;
         int clientNum = server->acceptOneClient();
         data->setAccept(clientNum);
         data->setSocket(server);
         int status1 = pthread_create(&t1,NULL,clientRiciever,(void*)data);
+        if(status1){
+            //error
+        }
     }
     return NULL;
 }

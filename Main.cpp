@@ -44,8 +44,7 @@ BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
  * @return null;
  */
 int main(int argc, char *argv[]) {
-    Socket* socket = new Tcp(true, IP, atoi(argv[1]));
-    socket->initialize();
+    int port = atoi(argv[1]);
     char buffer[1024];
 
     // get grid input from user
@@ -100,7 +99,7 @@ int main(int argc, char *argv[]) {
     }
     // call the menu for different input options
     Menu* menu = new Menu();
-    menu->online(grid, socket);
+    menu->online(grid, port);
 
     /**
     * deserialize buffer into string "waiting for move"
