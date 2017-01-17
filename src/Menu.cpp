@@ -102,8 +102,8 @@ void Menu:: online(Grid* grid, int port) {
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
-                Data *information = new Data(choice, taxiCenter, port, NULL, 0);
-                int status = pthread_create(&first, NULL, mainThread, (void *) information);
+                Data* information = new Data(choice, taxiCenter, port, NULL, 0);
+                int status = pthread_create(&first, NULL, mainThread, (void*)information);
                 if (status) {
                     //error
                 }
@@ -132,7 +132,7 @@ void Menu:: online(Grid* grid, int port) {
                                       tariff, timeOfStart, false);
                 taxiCenter->AddTrip(trip);
     //mutex//
-                int bfsStatus = pthread_create(&first, NULL, tripRoute, (void *) trip);
+                int bfsStatus = pthread_create(&first, NULL, tripRoute, (void*)trip);
                 if (bfsStatus) {
                     //error
                 }
@@ -257,7 +257,7 @@ void Menu:: online(Grid* grid, int port) {
     }
 }
 
-void* Menu::mainThread(void* info){
+void* Menu::mainThread(void *info){
     Data* data;
     data = (Data*)info;
     Socket* server = new Tcp(true, IP, data->getPort());
@@ -280,7 +280,7 @@ void* Menu::mainThread(void* info){
     return NULL;
 }
 
-void* Menu::clientRiciever(void* info){
+void* Menu::clientRiciever(void *info){
     State* newPosition;
     char buffer[1024];
     Trip *trip;
@@ -476,7 +476,6 @@ void* Menu::clientRiciever(void* info){
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
     //send the vector
-    std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
     boost::archive::binary_oarchive oa(s);
@@ -489,7 +488,7 @@ void* Menu::clientRiciever(void* info){
     return NULL;
 }
 
-void* Menu::tripRoute(void* info){
+void* Menu::tripRoute(void *info){
     Trip* trip;
     trip = (Trip*) info;
     BFS* bfs = new BFS(trip);
