@@ -1,5 +1,5 @@
 /**
- * This is the Client side application
+ * This is the Client side application.
  */
 #include <iostream>
 #include <fstream>
