@@ -260,7 +260,8 @@ void Menu:: online(Grid* grid, int port) {
 void* Menu::mainThread(void* info){
     Data* data;
     data = (Data*)info;
-    Socket* server = new Tcp(true, IP, data->getPort());
+    int currentPort = data->getPort();
+    Socket* server = new Tcp(true, IP, currentPort);
     server->initialize();
     pthread_mutex_init(&driverMutex,0);
     pthread_mutex_init(&taxiMutex,0);
@@ -272,7 +273,7 @@ void* Menu::mainThread(void* info){
         int clientNum = server->acceptOneClient();
         data->setAccept(clientNum);
         data->setSocket(server);
-        int status1 = pthread_create(&t1,NULL,clientRiciever,(void*)data);
+        int status1 = pthread_create(&t1,NULL, clientRiciever,(void*)data);
         if(status1){
             //error
         }
@@ -296,7 +297,7 @@ void* Menu::clientRiciever(void* info){
     TaxiCenter* center = data->getTaxiCenter();
     Driver *driver = new Driver(0, 0, 0, 0,NULL,
                                 Marride,NULL, false, 0);
-    serv->reciveData(buffer, sizeof(buffer));
+    serv->receiveData(buffer, sizeof(buffer));
     /*
      * deserialize buffer into driver object
      */
@@ -369,7 +370,7 @@ void* Menu::clientRiciever(void* info){
          * deserialize buffer into string "waiting for move"
          */
         string ss;
-        serv->reciveData(buffer, sizeof(buffer));
+        serv->receiveData(buffer, sizeof(buffer));
         std::string receive(buffer, sizeof(buffer));
 
         if(choice == 9){
@@ -446,7 +447,7 @@ void* Menu::clientRiciever(void* info){
                 s.flush();
                 serv->sendData(serial_str);
                 serial_str.clear();
-                serv->reciveData(buffer, sizeof(buffer));
+                serv->receiveData(buffer, sizeof(buffer));
             }
             //if we have reached end of route for the driver
             if(timer <= (tripTime + startTime) && driver->isOnTrip() == true){
@@ -471,7 +472,7 @@ void* Menu::clientRiciever(void* info){
     * deserialize buffer into string "waiting for move"
     */
     string ss;
-    serv->reciveData(buffer, sizeof(buffer));
+    serv->receiveData(buffer, sizeof(buffer));
     std::string receive(buffer, sizeof(buffer));
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;

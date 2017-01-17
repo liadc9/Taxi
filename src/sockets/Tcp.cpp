@@ -7,6 +7,7 @@
 * the class inherit from socket.       			*
 * methods of tcp socket type								*
 ************************************************************/
+#include <boost/iostreams/close.hpp>
 #include "Tcp.h"
 
 /***********************************************************************
@@ -182,4 +183,8 @@ int Tcp::receiveData(char* buffer, int size, int clientDescriptor) {
     }
     //return correct if there were no problem
     return read_bytes;
+}
+
+int Tcp::closeData() {
+    close(socketDescriptor);
 }
