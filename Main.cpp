@@ -101,26 +101,6 @@ int main(int argc, char *argv[]) {
     Menu* menu = new Menu();
     menu->online(grid, port);
 
-    /**
-    * deserialize buffer into string "waiting for move"
-    */
-    string ss;
-    socket->reciveData(buffer, sizeof(buffer));
-    std::string receive(buffer, sizeof(buffer));
-    // create vector empty of points to assure of end transmission
-    vector<Point> endTransmission;
-    //send the vector
-    std::string serial_str;
-    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-    boost::archive::binary_oarchive oa(s);
-    oa << endTransmission;
-    s.flush();
-    socket->sendData(serial_str);
-
-    //close the socket
-    delete socket;
-
     // frees memory before exiting the program.
     delete grid;
     delete menu;
