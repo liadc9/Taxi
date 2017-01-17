@@ -485,7 +485,7 @@ void* Menu::clientRiciever(void* info){
     s.flush();
     serv->sendData(serial_str, data->getAccept());
     //close the socket
-    delete socket;
+    delete serv;
 
     return NULL;
 }
