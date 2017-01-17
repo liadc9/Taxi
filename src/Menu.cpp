@@ -31,7 +31,8 @@
 #include <pthread.h>
 
 using namespace std;
-
+int choice;
+int timer ;
 /**
  * costrcutor for the menu
  */
@@ -70,21 +71,21 @@ void Menu:: online(Grid* grid, Socket* socket) {
     char color;
     int taxiID;
     int timeOfStart;
-    int x;
-    int choice = 0;
+    int z;
     // start time for the trip
     int startTime;
     // string for serialization
     string serial_str;
     Driver *driver;
-    Driver* driver1;
+    Driver *driver1;
     TaxiCenter *taxiCenter;
     taxiCenter = new TaxiCenter();
     // timer used in process online
-    int timer = 0;
     bool endOfRoute = false;
+    choice = 0;
+    timer = 0;
     // while program doesn't terminate
-    while(choice != 7) {
+    while (choice != 7) {
         // get user input for choice
         cin >> choice;
         string information;
@@ -98,15 +99,14 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
-                Data* information = new Data(choice,taxiCenter,1212,NULL,0);
-                int status = pthread_create(&first,NULL,mainThread,(void*)information);
-                if(status){
+                Data *information = new Data(choice, taxiCenter, 1212, NULL, 0);
+                int status = pthread_create(&first, NULL, mainThread, (void *) information);
+                if (status) {
                     //error
                 }
-
-
+                break;
             }
-            // create a trip
+                // create a trip
             case 2 : {
                 getline(cin, information);
                 parsedData = parse.DataSplit(information);
@@ -128,9 +128,14 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 Trip *trip = new Trip(id, start, end, grid, numPassengers,
                                       tariff, timeOfStart, false);
                 taxiCenter->AddTrip(trip);
+
+                int bfsStatus = pthread_create(&first, NULL, tripRoute, (void *) trip);
+                if (bfsStatus) {
+                    //error
+                }
                 break;
             }
-            // create a cab
+                // create a cab
             case 3 : {
                 getline(cin, information);
                 parsedData = parse.DataSplit(information);
@@ -165,7 +170,7 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 } else if (color == 'W') {
                     enumColor = WHITE;
                 }
-                State *location = new State(Point(0,0), NULL, false);
+                State *location = new State(Point(0, 0), NULL, false);
 
                 // create cab according to the data
                 if (taxi_type == 1) {
@@ -177,10 +182,9 @@ void Menu:: online(Grid* grid, Socket* socket) {
                                                     enumModel, taxi_type, 0, location, false);
                     taxiCenter->AddTaxiLux(lCab);
                 }
-
                 break;
             }
-            //get position of driver
+                //get position of driver
             case 4 : {
                 // find driver position
                 int cabDriver;
@@ -198,7 +202,7 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 delete pos;
                 break;
             }
-            // take all drivers to final trip position
+                // take all drivers to final trip position
             case 6 : {
                 // get all drivers to final postion
                 for (int i = 0; i < taxiCenter->getTrips().size(); i++) {
@@ -208,116 +212,46 @@ void Menu:: online(Grid* grid, Socket* socket) {
                 }
                 break;
             }
-            // move one step forward in timer - will move drivers on grid during trips
+                // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
-                State* newPosition;
-                char buffer[1024];
+                //THIS MUST STAY
                 timer++;
-                Trip *trip;
-                int tripTime;
-                //if driver has no trip and it is time for a trip to begin assign driver a trip
-                if (taxiCenter->getDrivers().at(0)->isOnTrip() == false ) {
-                    for (int i = 0; i < taxiCenter->getTrips().size(); i++) {
-                        if (taxiCenter->getTrips().at(i)->getHappening() == false) {
-                            trip = taxiCenter->getTrips().at(i);
-                            x = i;
-                        }
-                        if (trip->getTimeOfStart() == timer) {
-                            taxiCenter->getDrivers().at(0)->setOnTrip(true);
-                            /*
-                             * serialize route into buffer in order to send to client
-                             */
-                            BFS* bfs = new BFS(trip);
-                            vector<Point> route = bfs->AlgoRun();
-                            std::string serial_str;
-                            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                            boost::iostreams::stream<boost::iostreams::
-                            back_insert_device<std::string> > s(inserter);
-                            boost::archive::binary_oarchive oa(s);
-                            oa << route;
-                            s.flush();
-                            socket->sendData(serial_str);
-                            tripTime = route.size();
-                            startTime = trip->getTimeOfStart();
-                            break;
-                        }
-                    }
-                }
-                // if the driver is in a trip
-                 if (taxiCenter->getDrivers().at(0)->isOnTrip() == true
-                     && trip->getTimeOfStart() < timer) {
-                     /*
-                      * create next move for driver and serialize new position
-                      */
-                     State* end = trip->getdest();
-                     Grid* grid = trip->getGrid();
-                     Driver* cabDriver =  taxiCenter->getDrivers().at(0);
-                     State* cabState = cabDriver->getTaxiCabInfo()->getLocation();
-                     newPosition = cabDriver->getTaxiCabInfo()->move(cabState,end,grid);
-                     //serialize newPosition as point
-                     Point* position = new Point(newPosition->getState().getX(),
-                                                 newPosition->getState().getY());
-                     std::string serial_str;
-                     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                     boost::iostreams::stream<boost::iostreams::
-                     back_insert_device<std::string> > s(inserter);
-                     boost::archive::binary_oarchive oa(s);
-                     oa << position;
-                     s.flush();
-                     socket->sendData(serial_str);
-                     serial_str.clear();
-                     socket->reciveData(buffer, sizeof(buffer));
-                }
-                //if we have reached end of route for the driver
-                if(timer <= (tripTime + startTime) && taxiCenter->getDrivers()
-                                                              .at(0)->isOnTrip() == true){
-                    if (trip->getTimeOfStart() < timer){
-                        if (newPosition->getState().getX() == trip->getdest()->getState().getX() &&
-                            newPosition->getState().getY() == trip->getdest()->getState().getY()) {
-                            // after setting to false, next trip will override old trip info
-                            taxiCenter->getDrivers().at(0)->setOnTrip(false);
-                            //erase the trip
-                            taxiCenter->delTrip(x);
-                            delete trip;
-                        }
-                    }
-                }
-                }
-
+                //
                 break;
             }
 
-            // no default requirement
+                // no default requirement
         }
-    // remove all taxis from memory if 7 is pressed
-    for(int i = taxiCenter->getTaxis().size(); i >0; i--){
-        StandardCab* cab = taxiCenter->getTaxis().at(i-1);
-        delete cab;
-        taxiCenter->getTaxis().pop_back();
-    }
-    // remove all luxury taxis from memory if 7 is pressed
-    for(int i = taxiCenter->getLuxTaxis().size(); i >0; i--){
-        LuxuryCab* cab = taxiCenter->getLuxTaxis().at(i-1);
-        delete cab;
-        taxiCenter->getLuxTaxis().pop_back();
-    }
+        // remove all taxis from memory if 7 is pressed
+        for (int i = taxiCenter->getTaxis().size(); i > 0; i--) {
+            StandardCab *cab = taxiCenter->getTaxis().at(i - 1);
+            delete cab;
+            taxiCenter->getTaxis().pop_back();
+        }
+        // remove all luxury taxis from memory if 7 is pressed
+        for (int i = taxiCenter->getLuxTaxis().size(); i > 0; i--) {
+            LuxuryCab *cab = taxiCenter->getLuxTaxis().at(i - 1);
+            delete cab;
+            taxiCenter->getLuxTaxis().pop_back();
+        }
 
-    // remove all drivers from memory if 7 is pressed
-    for(int i = taxiCenter->getDrivers().size(); i >0; i--){
-        Driver* driver = taxiCenter->getDrivers().at(i-1);
-        delete driver;
-        taxiCenter->getDrivers().pop_back();
-    }
-    // remove all trips from memory if 7 is pressed
-    for(int i = taxiCenter->getTrips().size(); i >0; i--){
-        Trip* trip = taxiCenter->getTrips().at(i-1);
-        delete trip->getStart();
-        delete trip->getdest();
-        delete trip;
-        taxiCenter->getTrips().pop_back();
-    }
-    delete taxiCenter;
+        // remove all drivers from memory if 7 is pressed
+        for (int i = taxiCenter->getDrivers().size(); i > 0; i--) {
+            Driver *driver = taxiCenter->getDrivers().at(i - 1);
+            delete driver;
+            taxiCenter->getDrivers().pop_back();
+        }
+        // remove all trips from memory if 7 is pressed
+        for (int i = taxiCenter->getTrips().size(); i > 0; i--) {
+            Trip *trip = taxiCenter->getTrips().at(i - 1);
+            delete trip->getStart();
+            delete trip->getdest();
+            delete trip;
+            taxiCenter->getTrips().pop_back();
+        }
+        delete taxiCenter;
 
+    }
 }
 
 void* Menu::mainThread(void* info){
@@ -336,7 +270,12 @@ void* Menu::mainThread(void* info){
 }
 
 void* Menu::clientRiciever(void* info){
+    State* newPosition;
     char buffer[1024];
+    Trip *trip;
+    int tripTime;
+    int startTime;
+    int z;
     Data* data;
     data = (Data*)info;
     Socket* serv = data->getSocket();
@@ -358,7 +297,7 @@ void* Menu::clientRiciever(void* info){
     //add driver to taxicenter
     /*do lock mutex*/
     center->AddDriver(driver);
-    /*do unlock mutex*/
+
 
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getTaxis().size(); i++) {
@@ -411,6 +350,85 @@ void* Menu::clientRiciever(void* info){
     serv->reciveData(buffer, sizeof(buffer));
     std::string receive(buffer, sizeof(buffer));
 
+    while(choice != 7){
+        if(choice == 9){
+            //if driver has no trip and it is time for a trip to begin assign driver a trip
+            if (driver->isOnTrip() == false ) {
+                for (int i = 0; i < center->getTrips().size(); i++) {
+                    if (center->getTrips().at(i)->getHappening() == false) {
+                        trip = center->getTrips().at(i);
+                        z = i;
+                    }
+                    if (trip->getTimeOfStart() == timer) {
+                        driver->setOnTrip(true);
+                        /*
+                         * serialize route into buffer in order to send to client
+                         */
+                        BFS* bfs = new BFS(trip);
+                        vector<Point> route = bfs->AlgoRun();
+                        std::string serial_str;
+                        boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+                        boost::iostreams::stream<boost::iostreams::
+                        back_insert_device<std::string> > s(inserter);
+                        boost::archive::binary_oarchive oa(s);
+                        oa << route;
+                        s.flush();
+                        serv->sendData(serial_str);
+                        tripTime = route.size();
+                        startTime = trip->getTimeOfStart();
+                        break;
+                    }
+                }
+            }
+            // if the driver is in a trip
+            if (driver->isOnTrip() == true
+                && trip->getTimeOfStart() < timer) {
+                /*
+                 * create next move for driver and serialize new position
+                 */
+                State* end = trip->getdest();
+                Grid* grid = trip->getGrid();
+                Driver* cabDriver =  driver;
+                State* cabState = cabDriver->getTaxiCabInfo()->getLocation();
+                newPosition = cabDriver->getTaxiCabInfo()->move(cabState,end,grid);
+                //serialize newPosition as point
+                Point* position = new Point(newPosition->getState().getX(),
+                                            newPosition->getState().getY());
+                std::string serial_str;
+                boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+                boost::iostreams::stream<boost::iostreams::
+                back_insert_device<std::string> > s(inserter);
+                boost::archive::binary_oarchive oa(s);
+                oa << position;
+                s.flush();
+                serv->sendData(serial_str);
+                serial_str.clear();
+                serv->reciveData(buffer, sizeof(buffer));
+            }
+            //if we have reached end of route for the driver
+            if(timer <= (tripTime + startTime) && driver->isOnTrip() == true){
+                if (trip->getTimeOfStart() < timer){
+                    if (newPosition->getState().getX() == trip->getdest()->getState().getX() &&
+                        newPosition->getState().getY() == trip->getdest()->getState().getY()) {
+                        // after setting to false, next trip will override old trip info
+                        driver->setOnTrip(false);
+                        //erase the trip
+                        center->delTrip(z);
+                        delete trip;
+                    }
+                }
+            }
+        }
+    }
+    return NULL;
+}
 
+void* tripRoute(void* info){
+    Trip* trip;
+    trip = (Trip*) info;
+    BFS* bfs = new BFS(trip);
+    vector<Point> route = bfs->AlgoRun();
+    trip->setRoute(route);
 
+    return NULL;
 }

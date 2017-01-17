@@ -28,7 +28,6 @@ Trip::Trip(int id, State* start1, State* stop1,
     this->tariff = tariff;
     this->timeOfStart = timeOfStart;
     this->happening = happening;
-
 }
 /**
  * contructor of trip
@@ -167,4 +166,12 @@ bool Trip::getHappening(){
  */
 void Trip::setHappening(bool happening) {
     Trip::happening = happening;
+}
+
+vector<Point> Trip::getRoute(){
+    return route;
+}
+
+void Trip::setRoute(vector<Point> route) {
+    Trip::route = route;
 }
