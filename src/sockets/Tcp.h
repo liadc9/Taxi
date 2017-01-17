@@ -9,7 +9,7 @@
 
 class Tcp : public Socket{
 public:
-    Tcp(bool isServers, string ip_address, int port_num);
+    Tcp(bool isServers, int port_num);
     virtual ~Tcp();
     int initialize();
     int acceptOneClient();
