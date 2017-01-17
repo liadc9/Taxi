@@ -16,6 +16,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/serialization/export.hpp>
+#include <pthread.h>
 #include "Menu.h"
 #include "Parser.h"
 #include "Driver.h"
@@ -28,7 +29,6 @@
 #include "BFS.h"
 #include "sockets/Tcp.h"
 #include "Data.h"
-#include <pthread.h>
 
 using namespace std;
 int choice;
@@ -438,6 +438,22 @@ void* Menu::clientRiciever(void* info){
             }
         }
     }
+    /**
+    * deserialize buffer into string "waiting for move"
+    */
+    string ss;
+    serv->reciveData(buffer, sizeof(buffer));
+    std::string receive(buffer, sizeof(buffer));
+    // create vector empty of points to assure of end transmission
+    vector<Point> endTransmission;
+    //send the vector
+    std::string serial_str;
+    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
+    boost::archive::binary_oarchive oa(s);
+    oa << endTransmission;
+    s.flush();
+    serv->sendData(serial_str);
     return NULL;
 }
 
