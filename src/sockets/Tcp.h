@@ -15,7 +15,7 @@ public:
     int acceptOneClient();
     int sendData(string data, int clientDescriptor);
     int receiveData(char* buffer, int size, int clientDescriptor);
-
+    int closeData();
 };
 
 
