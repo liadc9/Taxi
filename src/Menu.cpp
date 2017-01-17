@@ -260,7 +260,7 @@ void* Menu::mainThread(void* info){
     Data* data;
     data = (Data*)info;
     int currentPort = data->getPort();
-    Socket* server = new Tcp(true, IP, currentPort);
+    Socket* server = new Tcp(true, IP , currentPort);
     server->initialize();
     pthread_mutex_init(&driverMutex,0);
     pthread_mutex_init(&taxiMutex,0);
