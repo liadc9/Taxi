@@ -258,7 +258,7 @@ void Menu:: online(Grid* grid, int port) {
 
 void* Menu::mainThread(void* info){
     Data* data;
-    data = (Data*)info;
+    data = (Data*)info; //this works now
     int currentPort = data->getPort();
     Socket* server = new Tcp(true, currentPort);
     server->initialize();
