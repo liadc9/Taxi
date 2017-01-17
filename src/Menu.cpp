@@ -30,6 +30,11 @@
 #include "sockets/Tcp.h"
 #include "Data.h"
 
+pthread_mutex_t driverMutex;
+pthread_mutex_t taxiMutex;
+pthread_mutex_t luxMutex;
+pthread_mutex_t tripsMutex;
+
 using namespace std;
 int choice;
 int timer ;
@@ -94,8 +99,6 @@ void Menu:: online(Grid* grid, int port) {
             // create driver
             case 1 : {
 
-                //create buffer
-                char buffer[1024];
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
@@ -259,7 +262,10 @@ void* Menu::mainThread(void* info){
     data = (Data*)info;
     Socket* server = new Tcp(true, IP, data->getPort());
     server->initialize();
-
+    pthread_mutex_init(&driverMutex,0);
+    pthread_mutex_init(&taxiMutex,0);
+    pthread_mutex_init(&luxMutex,0);
+    pthread_mutex_init(&tripsMutex,0);
 
     for(int i = 0; i < data->getNumOfDrivers(); i++){
         pthread_t t1;
@@ -304,15 +310,18 @@ void* Menu::clientRiciever(void* info){
     serial_str.clear();
     //add driver to taxicenter
     /*do lock mutex*/
+    pthread_mutex_lock(&driverMutex);
     center->AddDriver(driver);
+    pthread_mutex_unlock(&driverMutex);
 
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getTaxis().size(); i++) {
         if (center->getTaxis().at(i)->getCab_ID() == driver->getTaxiID()) {
             driver->setTaxiCabInfo(center->getTaxis().at(i));
             // now the cab has a driver
+            pthread_mutex_lock(&taxiMutex);
             center->getTaxis().at(i)->setHasDriver(true);
-            //  taxiCenter->AddDriver(driver1);
+            pthread_mutex_unlock(&taxiMutex);
 
             /*
              * serialize ItaxiCab into buffer in order to send to client
@@ -334,7 +343,10 @@ void* Menu::clientRiciever(void* info){
         if (center->getLuxTaxis().at(i)->getCab_ID() == driver->getTaxiID()) {
             driver->setTaxiCabInfo(center->getLuxTaxis().at(i));
             // now the cab has a driver
+            pthread_mutex_lock(&luxMutex);
             center->getLuxTaxis().at(i)->setHasDriver(true);
+            pthread_mutex_unlock(&luxMutex);
+
             /*
              * serialize ItaxiCab into buffer in order to send to client
              */
@@ -368,6 +380,9 @@ void* Menu::clientRiciever(void* info){
                         if( first == 0){
                             if (center->getTrips().at(i)->getRide_id() == driver->getId()){
                                 trip = center->getTrips().at(i);
+                                pthread_mutex_lock(&tripsMutex);
+                                trip->setHappening(true);
+                                pthread_mutex_unlock(&tripsMutex);
                                 z = i;
                                 first++;
                             }
@@ -375,15 +390,22 @@ void* Menu::clientRiciever(void* info){
                         else if(center->getTrips().at(i)->getStart()->getState().getX() == xCor &&
                                 center->getTrips().at(i)->getStart()->getState().getX() == yCor){
                                 trip = center->getTrips().at(i);
+                                pthread_mutex_lock(&tripsMutex);
+                                trip->setHappening(true);
+                                pthread_mutex_unlock(&tripsMutex);
                                 z = i;
                         }
                     }
                     if (trip->getTimeOfStart() == timer) {
+                        pthread_mutex_lock(&driverMutex);
                         driver->setOnTrip(true);
+                        pthread_mutex_unlock(&driverMutex);
                         /*
                          * serialize route into buffer in order to send to client
                          */
+                        pthread_mutex_lock(&tripsMutex);
                         vector<Point> route = trip->getRoute();
+                        pthread_mutex_unlock(&tripsMutex);
                         std::string serial_str;
                         boost::iostreams::back_insert_device<std::string> inserter(serial_str);
                         boost::iostreams::stream<boost::iostreams::
@@ -399,8 +421,7 @@ void* Menu::clientRiciever(void* info){
                 }
             }
             // if the driver is in a trip
-            if (driver->isOnTrip() == true
-                && trip->getTimeOfStart() < timer) {
+            if (driver->isOnTrip() == true && trip->getTimeOfStart() < timer) {
                 /*
                  * create next move for driver and serialize new position
                  */
@@ -408,7 +429,11 @@ void* Menu::clientRiciever(void* info){
                 Grid* grid = trip->getGrid();
                 Driver* cabDriver =  driver;
                 State* cabState = cabDriver->getTaxiCabInfo()->getLocation();
+                pthread_mutex_lock(&taxiMutex);
+                pthread_mutex_lock(&luxMutex);
                 newPosition = cabDriver->getTaxiCabInfo()->move(cabState,end,grid);
+                pthread_mutex_unlock(&tripsMutex);
+                pthread_mutex_unlock(&luxMutex);
                 //serialize newPosition as point
                 Point* position = new Point(newPosition->getState().getX(),
                                             newPosition->getState().getY());
@@ -429,9 +454,13 @@ void* Menu::clientRiciever(void* info){
                     if (newPosition->getState().getX() == trip->getdest()->getState().getX() &&
                         newPosition->getState().getY() == trip->getdest()->getState().getY()) {
                         // after setting to false, next trip will override old trip info
+                        pthread_mutex_lock(&driverMutex);
                         driver->setOnTrip(false);
+                        pthread_mutex_unlock(&driverMutex);
                         //erase the trip
+                        pthread_mutex_lock(&tripsMutex);
                         center->delTrip(z);
+                        pthread_mutex_unlock(&tripsMutex);
                         delete trip;
                     }
                 }
