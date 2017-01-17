@@ -101,13 +101,13 @@ int main(int argc, char *argv[]) {
     boost::archive::binary_oarchive oa(s);
     oa << driver;
     s.flush();
-    client->sendData(serial_str);
+    client->sendData(serial_str, 0);
     serial_str.clear();
 
 
 //deserialize to taxi
     ITaxiCab* taxi;
-    client->reciveData(buffer, sizeof(buffer));
+    client->receiveData(buffer, sizeof(buffer), 0);
     string serial_str2(buffer, sizeof(buffer));
     boost::iostreams::basic_array_source<char> device(serial_str2.c_str(), serial_str2.size());
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -122,10 +122,10 @@ int main(int argc, char *argv[]) {
     // this loop is used to send the data while we are on a trip
     while( go == false) {
             std::string sttt = "waiting for trip";
-            client->sendData(sttt);
+            client->sendData(sttt, 0);
             //deserialize to trip
             vector<Point> tripRoute;
-            client->reciveData(buffer, sizeof(buffer));
+            client->receiveData(buffer, sizeof(buffer), 0);
             string serial_str2(buffer, sizeof(buffer));
             boost::iostreams::basic_array_source<char> device(serial_str2.c_str(), serial_str2.size());
             boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -152,11 +152,11 @@ int main(int argc, char *argv[]) {
                 boost::archive::binary_oarchive oa(s);
                 oa << go;
                 s.flush();
-                client->sendData(serial3_str);
+                client->sendData(serial3_str, 0);
                 serial3_str.clear();
 
                 //recevieng correct new location from server to diserialize
-                client->reciveData(buffer, sizeof(buffer));
+                client->receiveData(buffer, sizeof(buffer), 0);
                 //deserialize location as point
                 Point *location;
                 std::string locationStr(buffer, sizeof(buffer));
