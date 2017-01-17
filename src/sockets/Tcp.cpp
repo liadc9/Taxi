@@ -16,9 +16,10 @@
 * The Function operation: creating new Tcp. initialize if server and   *
 * port_num by the input												   *
 ***********************************************************************/
-Tcp::Tcp(bool isServers, int port_num) {
+Tcp::Tcp(bool isServers, string ip_address, int port_num) {
     this->port_number = port_num;
     this->isServer = isServers;
+    this->ip_address = ip_address;
 
 }
 

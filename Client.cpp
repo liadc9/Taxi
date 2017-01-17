@@ -8,6 +8,7 @@
 #include <boost/any.hpp>
 #include "src/sockets/Socket.h"
 #include "src/sockets/Udp.h"
+#include "src/sockets/Tcp.h"
 #include "src/Parser.h"
 #include "src/Driver.h"
 #include "src/BFS.h"
@@ -53,7 +54,7 @@ int main(int argc, char *argv[]) {
     char buffer[1024];
     vector<Point> tripRoute;
     // open new socket at correct port
-    Socket* client = new Udp(false, argv[1], atoi(argv[2]));
+    Socket* client = new Tcp(false, argv[1], atoi(argv[2]));
     client->initialize();
 
     // get driver input from user

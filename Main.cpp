@@ -15,7 +15,7 @@
 #include "src/TaxiCenter.h"
 #include <boost/any.hpp>
 #include "src/Menu.h"
-#include "src/sockets/Udp.h"
+#include "src/sockets/Tcp.h"
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/tokenizer.hpp>
@@ -44,8 +44,8 @@ BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
  * @return null;
  */
 int main(int argc, char *argv[]) {
-   /* Socket* socket = new Udp(true, IP, atoi(argv[1]));
-    socket->initialize();*/
+    Socket* socket = new Tcp(true, IP, atoi(argv[1]));
+    socket->initialize();
     char buffer[1024];
 
     // get grid input from user
