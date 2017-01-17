@@ -477,7 +477,7 @@ void* Menu::clientRiciever(void* info){
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
     //send the vector
-    std::string serial_str;
+
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
     boost::archive::binary_oarchive oa(s);
