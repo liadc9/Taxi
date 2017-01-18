@@ -457,8 +457,8 @@ void* Menu::clientRiciever(void* info){
                 pthread_mutex_lock(&taxiMutex);
                 pthread_mutex_lock(&luxMutex);
                 newPosition = cabDriver->getTaxiCabInfo()->move(cabState,end,grid);
-                pthread_mutex_unlock(&tripsMutex);
                 pthread_mutex_unlock(&luxMutex);
+                pthread_mutex_unlock(&taxiMutex);
                 //serialize newPosition as point
                 Point* position = new Point(newPosition->getState().getX(),
                                             newPosition->getState().getY());
