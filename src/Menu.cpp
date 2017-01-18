@@ -375,6 +375,22 @@ void* Menu::clientRiciever(void* info){
                                 pthread_mutex_unlock(&tripsMutex);
                                 z = i;
                                 first++;
+                                /*
+                         * serialize route into buffer in order to send to client
+                         */
+                                pthread_mutex_lock(&tripsMutex);
+                                vector<Point> route = trip->getRoute();
+                                pthread_mutex_unlock(&tripsMutex);
+                                std::string serial_str;
+                                boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+                                boost::iostreams::stream<boost::iostreams::
+                                back_insert_device<std::string> > s(inserter);
+                                boost::archive::binary_oarchive oa(s);
+                                oa << route;
+                                s.flush();
+                                serv->sendData(serial_str, data->getAccept());
+                                tripTime = route.size();
+                                startTime = trip->getTimeOfStart();
                             }
                         }
                         else if(center->getTrips().at(i)->getStart()->getState().getX() == xCor &&
@@ -384,6 +400,22 @@ void* Menu::clientRiciever(void* info){
                                 trip->setHappening(true);
                                 pthread_mutex_unlock(&tripsMutex);
                                 z = i;
+                            /*
+                         * serialize route into buffer in order to send to client
+                         */
+                            pthread_mutex_lock(&tripsMutex);
+                            vector<Point> route = trip->getRoute();
+                            pthread_mutex_unlock(&tripsMutex);
+                            std::string serial_str;
+                            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+                            boost::iostreams::stream<boost::iostreams::
+                            back_insert_device<std::string> > s(inserter);
+                            boost::archive::binary_oarchive oa(s);
+                            oa << route;
+                            s.flush();
+                            serv->sendData(serial_str, data->getAccept());
+                            tripTime = route.size();
+                            startTime = trip->getTimeOfStart();
                         }
                     }
                     if (trip->getTimeOfStart() == timer) {
@@ -393,7 +425,7 @@ void* Menu::clientRiciever(void* info){
                         /*
                          * serialize route into buffer in order to send to client
                          */
-                        pthread_mutex_lock(&tripsMutex);
+                        /*pthread_mutex_lock(&tripsMutex);
                         vector<Point> route = trip->getRoute();
                         pthread_mutex_unlock(&tripsMutex);
                         std::string serial_str;
@@ -405,7 +437,7 @@ void* Menu::clientRiciever(void* info){
                         s.flush();
                         serv->sendData(serial_str, data->getAccept());
                         tripTime = route.size();
-                        startTime = trip->getTimeOfStart();
+                        startTime = trip->getTimeOfStart();*/
                         break;
                     }
                 }
