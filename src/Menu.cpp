@@ -286,7 +286,7 @@ void* Menu::clientRiciever(void* info){
     TaxiCenter* center = data->getTaxiCenter();
     Driver *driver = new Driver(0, 0, 0, 0,NULL,
                                 Marride,NULL, false, 0);
-    serv->receiveData(buffer, sizeof(buffer), 0);
+    serv->receiveData(buffer, sizeof(buffer), data->getAccept());
     /*
      * deserialize buffer into driver object
      */
@@ -324,7 +324,7 @@ void* Menu::clientRiciever(void* info){
             boost::archive::binary_oarchive oa(s);
             oa << cab;
             s.flush();
-            serv->sendData(serial_str, 0);
+            serv->sendData(serial_str, data->getAccept());
             serial_str.clear();
         }
     }
@@ -348,7 +348,7 @@ void* Menu::clientRiciever(void* info){
             boost::archive::binary_oarchive oa(s);
             oa << cab;
             s.flush();
-            serv->sendData(serial_str, 0);
+            serv->sendData(serial_str, data->getAccept());
             serial_str.clear();
         }
     }
