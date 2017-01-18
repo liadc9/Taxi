@@ -490,7 +490,7 @@ void* Menu::clientRiciever(void* info){
         }
     }
     /**
-    * deserialize buffer into string "waiting for move"
+    * deeserialize buffer into string "waiting for move"
     */
     string ss;
     serv->receiveData(buffer, sizeof(buffer), data->getAccept());
