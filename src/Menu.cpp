@@ -102,10 +102,24 @@ void Menu:: online(Grid* grid, int port) {
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
-                Data *information = new Data(choice, taxiCenter, port, NULL, 0);
-                int status = pthread_create(&first, NULL, mainThread, (void *) information);
-                if (status) {
-                    //error
+                Data* data = new Data(choice, taxiCenter, port, NULL, 0);
+                int currentPort = data->getPort();
+                Socket* server = new Tcp(true, currentPort);
+                server->initialize();
+                pthread_mutex_init(&driverMutex,0);
+                pthread_mutex_init(&taxiMutex,0);
+                pthread_mutex_init(&luxMutex,0);
+                pthread_mutex_init(&tripsMutex,0);
+
+                for(int i = 0; i < data->getNumOfDrivers(); i++) {
+                    pthread_t t1;
+                    int clientNum = server->acceptOneClient();
+                    data->setAccept(clientNum);
+                    data->setSocket(server);
+                    int status1 = pthread_create(&t1, NULL, clientRiciever, (void *) data);
+                    /*              if(status1){
+                                      //error
+                                  }*/
                 }
                 break;
             }
@@ -254,30 +268,6 @@ void Menu:: online(Grid* grid, int port) {
             taxiCenter->getTrips().pop_back();
         }
         delete taxiCenter;
-}
-
-void* Menu::mainThread(void* info){
-    Data* data;
-    data = (Data*)info; //this works now
-    int currentPort = data->getPort();
-    Socket* server = new Tcp(true, currentPort);
-    server->initialize();
-    pthread_mutex_init(&driverMutex,0);
-    pthread_mutex_init(&taxiMutex,0);
-    pthread_mutex_init(&luxMutex,0);
-    pthread_mutex_init(&tripsMutex,0);
-
-    for(int i = 0; i < data->getNumOfDrivers(); i++){
-        pthread_t t1;
-        int clientNum = server->acceptOneClient();
-        data->setAccept(clientNum);
-        data->setSocket(server);
-        int status1 = pthread_create(&t1,NULL, clientRiciever,(void*)data);
-        if(status1){
-            //error
-        }
-    }
-    return NULL;
 }
 
 void* Menu::clientRiciever(void* info){

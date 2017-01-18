@@ -12,7 +12,6 @@ class Menu {
 public:
     Menu();
     void online(Grid* grid,int port);
-    static void* mainThread(void* info);
     static void* clientRiciever(void* info);
     static void* tripRoute(void* info);
 };
