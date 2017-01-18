@@ -233,6 +233,7 @@ void Menu:: online(Grid* grid, int port) {
             case 9 : {
                 //THIS MUST STAY
                 timer++;
+                cout << timer << endl;
                 //
                 break;
             }
@@ -286,6 +287,7 @@ void* Menu::clientRiciever(void* info){
     TaxiCenter* center = data->getTaxiCenter();
     Driver *driver = new Driver(0, 0, 0, 0,NULL,
                                 Marride,NULL, false, 0);
+    //wait for client to send driver
     serv->receiveData(buffer, sizeof(buffer), data->getAccept());
     /*
      * deserialize buffer into driver object
@@ -303,6 +305,7 @@ void* Menu::clientRiciever(void* info){
     pthread_mutex_lock(&driverMutex);
     center->AddDriver(driver);
     pthread_mutex_unlock(&driverMutex);
+    cout << "test" << endl;
 
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getTaxis().size(); i++) {
@@ -468,7 +471,9 @@ void* Menu::clientRiciever(void* info){
                 s.flush();
                 serv->sendData(serial_str, data->getAccept());
                 serial_str.clear();
-                serv->receiveData(buffer, sizeof(buffer), data->getAccept());
+                //WTF???????????????????????
+                //
+                // serv->receiveData(buffer, sizeof(buffer), data->getAccept());
             }
             //if we have reached end of route for the driver
             if(timer <= (tripTime + startTime) && driver->isOnTrip() == true){

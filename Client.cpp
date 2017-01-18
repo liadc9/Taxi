@@ -101,6 +101,7 @@ int main(int argc, char *argv[]) {
     boost::archive::binary_oarchive oa(s);
     oa << driver;
     s.flush();
+    // send driver to server
     client->sendData(serial_str, 0);
     serial_str.clear();
 
