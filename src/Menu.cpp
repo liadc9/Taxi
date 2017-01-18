@@ -96,7 +96,7 @@ void Menu:: online(Grid* grid, int port) {
         string information;
         cin.ignore();
         switch (choice) {
-            // create driver
+            // create driver/
             case 1 : {
 
                 // get number of drivers to input for server side
