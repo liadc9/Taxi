@@ -35,10 +35,12 @@ pthread_mutex_t taxiMutex;
 pthread_mutex_t luxMutex;
 pthread_mutex_t tripsMutex;
 map<int,std::vector<int>*> moves;
-
-using namespace std;
 int choice;
 int timer ;
+int wait = 0;
+
+using namespace std;
+
 /**
  * costrcutor for the menu
  */
@@ -103,7 +105,7 @@ void Menu:: online(Grid* grid, int port) {
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
-                data = new Data(choice, taxiCenter, port, NULL, 0,0);
+                data = new Data(choice, taxiCenter, port, NULL, 0);
                 int currentPort = data->getPort();
                 Socket* server = new Tcp(true, currentPort);
                 server->initialize();
@@ -116,13 +118,13 @@ void Menu:: online(Grid* grid, int port) {
                     int clientNum = server->acceptOneClient();
                     data->setAccept(clientNum);
                     data->setSocket(server);
-                    data->setKeyNum(i);
+                    moves[clientNum] = new vector<int>;
+                    moves[clientNum]->push_back(0);
                     int status1 = pthread_create(&t1, NULL, clientRiciever, (void *) data);
                     if(status1){
                         cout << "error" << endl;
                     }
-                    sleep(2);
-                    moves[i] = new vector<int>;
+                    sleep(1);
                 }
                 break;
             }
@@ -282,11 +284,14 @@ void* Menu::clientRiciever(void* info){
     int first =0;
     Data* data;
     data = (Data*)info;
+    cout << "gal" << endl;
     Socket* serv = data->getSocket();
     TaxiCenter* center = data->getTaxiCenter();
     Driver *driver = new Driver(0, 0, 0, 0,NULL,
                                 Marride,NULL, false, 0);
     //wait for client to send driver
+    cout << "gal1" << endl;
+
     serv->receiveData(buffer, sizeof(buffer), data->getAccept());
     /*
      * deserialize buffer into driver object
@@ -300,7 +305,6 @@ void* Menu::clientRiciever(void* info){
     ia >> driver;
     serial_str.clear();
     //add driver to taxicenter
-    /*do lock mutex*/
     pthread_mutex_lock(&driverMutex);
     center->AddDriver(driver);
     pthread_mutex_unlock(&driverMutex);
@@ -362,9 +366,14 @@ void* Menu::clientRiciever(void* info){
     serv->receiveData(buffer, sizeof(buffer), data->getAccept());
     cout << "ff2" << endl;
     std::string receive(buffer, sizeof(buffer));
+    sleep(10);
+    wait++;
     while(choice != 7){
-        cout << "ff3" << endl;
-        if(moves[data->getKeyNum()]->size() != 0 ){
+        while(wait != data->getNumOfDrivers()){
+
+        }
+        if(choice == 9){
+        if(moves[data->getAccept()]->at(1) != 0 ){
             //if driver has no trip and it is time for a trip to begin assign driver a trip
             if (driver->isOnTrip() == false ) {
                 for (int i = 0; i < center->getTrips().size(); i++) {
@@ -496,7 +505,8 @@ void* Menu::clientRiciever(void* info){
                     }
                 }
             }
-            moves[data->getKeyNum()]->pop_back();
+            moves[data->getAccept()]->pop_back();
+        }
         }
     }
     // create vector empty of points to assure of end transmission

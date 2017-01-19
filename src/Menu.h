@@ -12,6 +12,9 @@
 #include "sockets/Socket.h"
 
 extern std::map<int,std::vector<int>*> moves;
+extern int choice;
+extern int timer;
+extern int wait;
 
 class Menu {
 public:
