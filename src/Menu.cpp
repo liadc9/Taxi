@@ -34,7 +34,7 @@ pthread_mutex_t driverMutex;
 pthread_mutex_t taxiMutex;
 pthread_mutex_t luxMutex;
 pthread_mutex_t tripsMutex;
-std::map<int,std::vector<int>> moves;
+map<int,std::vector<int>*> moves;
 
 using namespace std;
 int choice;
@@ -122,7 +122,7 @@ void Menu:: online(Grid* grid, int port) {
                         cout << "error" << endl;
                     }
                     sleep(2);
-                    moves.insert( std::make_pair( i, vector<int>() ) );
+                    moves[i] = new vector<int>;
                 }
                 break;
             }
@@ -230,7 +230,7 @@ void Menu:: online(Grid* grid, int port) {
                 // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
                 for(int i = 0; i < data->getNumOfDrivers(); i++) {
-                    moves.find(i)->second.push_back(1);
+                    moves[i]->push_back(1);
                 }
                 //THIS MUST STAY
                 timer++;
@@ -306,7 +306,7 @@ void* Menu::clientRiciever(void* info){
     pthread_mutex_unlock(&driverMutex);
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getTaxis().size(); i++) {
-        if (center->getTaxis().at(i)->getCab_ID() == driver->getTaxiID()) {
+        if (center->getTaxis().at(i)->getCab_ID() == driver->getId()) {
             driver->setTaxiCabInfo(center->getTaxis().at(i));
             // now the cab has a driver
             pthread_mutex_lock(&taxiMutex);
@@ -329,7 +329,7 @@ void* Menu::clientRiciever(void* info){
     }
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getLuxTaxis().size(); i++) {
-        if (center->getLuxTaxis().at(i)->getCab_ID() == driver->getTaxiID()) {
+        if (center->getLuxTaxis().at(i)->getCab_ID() == driver->getId()) {
             driver->setTaxiCabInfo(center->getLuxTaxis().at(i));
             // now the cab has a driver
             pthread_mutex_lock(&luxMutex);
@@ -338,7 +338,6 @@ void* Menu::clientRiciever(void* info){
             /*
              * serialize ItaxiCab into buffer in order to send to client
              */
-           // cout << "gal" << endl;
             ITaxiCab* cab = driver->getTaxiCabInfo();
             std::string serial_str;
             boost::iostreams::back_insert_device<std::string> inserter(serial_str);
@@ -351,18 +350,21 @@ void* Menu::clientRiciever(void* info){
             serial_str.clear();
         }
     }
+    cout << "ff1" << endl;
     xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
     yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
     /*
-         * deserialize buffer into string "waiting for move"
-         */
+     * deserialize buffer into string "waiting for move"
+     */
     cout << "ff" << endl;
     pthread_t bfsR;
     string ss;
     serv->receiveData(buffer, sizeof(buffer), data->getAccept());
+    cout << "ff2" << endl;
     std::string receive(buffer, sizeof(buffer));
     while(choice != 7){
-        if(moves.find(data->getKeyNum())->second.size() != 0 ){
+        cout << "ff3" << endl;
+        if(moves[data->getKeyNum()]->size() != 0 ){
             //if driver has no trip and it is time for a trip to begin assign driver a trip
             if (driver->isOnTrip() == false ) {
                 for (int i = 0; i < center->getTrips().size(); i++) {
@@ -433,7 +435,6 @@ void* Menu::clientRiciever(void* info){
                             startTime = trip->getTimeOfStart();
                         }
                     }
-                    cout << "gg" << endl;
                     if (trip->getTimeOfStart() == timer) {
                         pthread_mutex_lock(&driverMutex);
                         driver->setOnTrip(true);
@@ -495,7 +496,7 @@ void* Menu::clientRiciever(void* info){
                     }
                 }
             }
-            moves.find(data->getKeyNum())->second.pop_back();
+            moves[data->getKeyNum()]->pop_back();
         }
     }
     // create vector empty of points to assure of end transmission

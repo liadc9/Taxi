@@ -6,11 +6,12 @@
 #define TAXI_MENU_H
 
 #include <map>
+#include <queue>
 #include"Grid.h"
 #include "Driver.h"
 #include "sockets/Socket.h"
 
-extern std::map<int,std::vector<int>> moves;
+extern std::map<int,std::vector<int>*> moves;
 
 class Menu {
 public:
