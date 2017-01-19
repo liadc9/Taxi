@@ -4,12 +4,13 @@
 
 #include "Data.h"
 
-Data::Data(int numOfDrivers ,TaxiCenter* taxiCenter ,int port ,Socket* socket ,int accept){
+Data::Data(int numOfDrivers ,TaxiCenter* taxiCenter ,int port ,Socket* socket ,int accept, int keyNum){
     this->numOfDrivers = numOfDrivers;
     this->taxiCenter = taxiCenter;
     this->port = port;
     this->socket = socket;
     this->accept = accept;
+    this-> keyNum = keyNum;
 }
 
 Data::~Data() {
@@ -54,4 +55,12 @@ int Data::getAccept(){
 
 void Data::setAccept(int accept) {
     Data::accept = accept;
+}
+
+int Data::getKeyNum() {
+    return keyNum;
+}
+
+void Data::setKeyNum(int keyNum) {
+    Data::keyNum = keyNum;
 }

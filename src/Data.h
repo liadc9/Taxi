@@ -16,9 +16,10 @@ private:
     int port;
     Socket* socket;
     int accept;
+    int keyNum;
 
 public:
-    Data(int numOfDrivers,TaxiCenter* taxiCenter,int port,Socket* socket,int accept);
+    Data(int numOfDrivers,TaxiCenter* taxiCenter,int port,Socket* socket,int accept, int keyNum);
 
     ~Data();
 
@@ -41,6 +42,10 @@ public:
     int getAccept();
 
     void setAccept(int accept);
+
+    int getKeyNum();
+
+    void setKeyNum(int keyNum);
 
 };
 

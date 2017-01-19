@@ -4,9 +4,13 @@
 
 #ifndef TAXI_MENU_H
 #define TAXI_MENU_H
-#include "Grid.h"
+
+#include <map>
+#include"Grid.h"
 #include "Driver.h"
 #include "sockets/Socket.h"
+
+extern std::map<int,std::vector<int>> moves;
 
 class Menu {
 public:
