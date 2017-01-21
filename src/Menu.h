@@ -11,7 +11,7 @@
 #include "Driver.h"
 #include "sockets/Socket.h"
 
-extern std::map<int,std::vector<int>*> moves;
+extern std::map<int,bool> moves;
 extern int choice;
 extern int timer;
 extern int wait;

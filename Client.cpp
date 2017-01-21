@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
                 boost::archive::binary_oarchive oa(s);
                 oa << go;
                 s.flush();
-                client->sendData(serial3_str, 0);
+                client->sendData(serial3_str, 0); // not used on first iteration, is reached at all??? liadddddd
                 serial3_str.clear();
 
                 //recevieng correct new location from server to diserialize

@@ -34,7 +34,8 @@ pthread_mutex_t driverMutex;
 pthread_mutex_t taxiMutex;
 pthread_mutex_t luxMutex;
 pthread_mutex_t tripsMutex;
-map<int,std::vector<int>*> moves;
+map<int,bool> moves;
+vector<int> acceptVect;
 int choice;
 int timer ;
 int wait = 0;
@@ -118,8 +119,8 @@ void Menu:: online(Grid* grid, int port) {
                     int clientNum = server->acceptOneClient();
                     data->setAccept(clientNum);
                     data->setSocket(server);
-                    moves[clientNum] = new vector<int>;
-                    moves[clientNum]->push_back(0);
+                    moves[clientNum] = false;
+                    acceptVect.push_back(data->getAccept());
                     int status1 = pthread_create(&t1, NULL, clientRiciever, (void *) data);
                     if(status1){
                         cout << "error" << endl;
@@ -231,8 +232,13 @@ void Menu:: online(Grid* grid, int port) {
             }
                 // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
-                for(int i = 0; i < data->getNumOfDrivers(); i++) {
-                    moves[i]->push_back(1);
+                int i = 0;
+                int posInAcceptVec = 0;
+                vector<int>::iterator it;
+                for(it = acceptVect.begin() ; it < acceptVect.end(); it++,i++ ) {
+                    posInAcceptVec = acceptVect.at(i);
+                    moves[posInAcceptVec] = true;
+
                 }
                 //THIS MUST STAY
                 timer++;
@@ -373,7 +379,7 @@ void* Menu::clientRiciever(void* info){
 
         }
         if(choice == 9){
-        if(moves[data->getAccept()]->at(1) != 0 ){
+        if(moves[data->getAccept()] == true){
             //if driver has no trip and it is time for a trip to begin assign driver a trip
             if (driver->isOnTrip() == false ) {
                 for (int i = 0; i < center->getTrips().size(); i++) {
@@ -448,7 +454,7 @@ void* Menu::clientRiciever(void* info){
                         pthread_mutex_lock(&driverMutex);
                         driver->setOnTrip(true);
                         pthread_mutex_unlock(&driverMutex);
-                        //break;
+                        break;
                     }
                 }
             }
@@ -505,8 +511,9 @@ void* Menu::clientRiciever(void* info){
                     }
                 }
             }
-            moves[data->getAccept()]->pop_back();
+            moves[data->getAccept()] == false;
         }
+            choice = 10;
         }
     }
     // create vector empty of points to assure of end transmission
