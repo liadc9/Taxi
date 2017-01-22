@@ -375,17 +375,14 @@ void* Menu::clientRiciever(void* info){
     std::string receive(buffer, sizeof(buffer));
    // sleep(10);
     wait++;
-    wait2 = timer;
+    wait2 = 0;
     cout << "position of thread" << data->getAccept() << endl;
     while(choice != 7){
         while(wait != data->getNumOfDrivers()){
 
         }
-           if(choice == 9){
-               /*
-            while(wait2 != timer){
 
-            }*/
+        if(choice == 9){
             if(!moves[data->getAccept()]->empty()) {
                 if (moves[data->getAccept()]->at(0) == 1) {
                     //if driver has no trip and it is time for a trip to begin assign driver a trip
@@ -498,7 +495,7 @@ void* Menu::clientRiciever(void* info){
                     }
                     //if we have reached end of route for the driver
                     if (ourTime <= (tripTime + startTime) && driver->isOnTrip() == true) {
-                        if (trip->getTimeOfStart() < timer) {
+                        if (trip->getTimeOfStart() < ourTime) {
                             if (newPosition->getState().getX() == trip->getdest()->getState().getX() &&
                                 newPosition->getState().getY() == trip->getdest()->getState().getY()) {
                                 // after setting to false, next trip will override old trip info
