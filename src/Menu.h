@@ -25,6 +25,7 @@ public:
     static void* clientCreat(void* info);
     static void* clientRiciever(void* info);
     static void* tripRoute(void* info);
+    static void* tripThread(void* info);
 
 private:
 /*    struct Data
