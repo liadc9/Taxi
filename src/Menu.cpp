@@ -537,7 +537,7 @@ void* Menu::clientRiciever(void* info){
                         }
                         //if we have reached end of route for the driver
                         if (ourTime <= (tripTime + startTime) && driver->isOnTrip() == true) {
-                            if (trip->getTimeOfStart() < ourTime) {
+                           if (trip->getTimeOfStart() < ourTime) {
                                 if (newPosition->getState().getX() == trip->getdest()->getState().getX() &&
                                     newPosition->getState().getY() == trip->getdest()->getState().getY()) {
                                     // after setting to false, next trip will override old trip info
