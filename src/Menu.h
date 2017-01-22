@@ -11,10 +11,12 @@
 #include "Driver.h"
 #include "sockets/Socket.h"
 
-extern std::map<int,bool> moves;
+extern map<int,vector<int>*> moves;
+extern vector<int> acceptVect;
 extern int choice;
 extern int timer;
 extern int wait;
+extern int wait2;
 
 class Menu {
 public:
