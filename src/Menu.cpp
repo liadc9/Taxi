@@ -1,5 +1,5 @@
 /**
- * The following class is used to hold all posssible menu options class
+ * The following class is used to hold all posssible menu options classs
  */
 #include <iostream>
 #include <fstream>
