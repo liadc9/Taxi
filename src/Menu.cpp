@@ -102,7 +102,7 @@ void Menu:: online(Grid* grid, int port) {
         switch (choice) {
             // create driver/
             case 1 : {
-
+                pthread_t t1;
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
@@ -110,11 +110,20 @@ void Menu:: online(Grid* grid, int port) {
 //                int currentPort = data->getPort();
                 Socket* server = new Tcp(true, port);
                 server->initialize();
+                data = new Data(choice,taxiCenter,port,server,0);
                 pthread_mutex_init(&driverMutex,0);
                 pthread_mutex_init(&taxiMutex,0);
                 pthread_mutex_init(&luxMutex,0);
                 pthread_mutex_init(&tripsMutex,0);
-                for(int i = 0; i < data->getNumOfDrivers(); i++) {
+                int status1 = pthread_create(&t1, NULL, clientCreat, (void *) data);
+                if(status1){
+                    cout << "error" << endl;
+                }
+                pthread_join(t1,NULL);
+                while(choice != taxiCenter->getDrivers().size()){
+
+                }
+                /*for(int i = 0; i < data->getNumOfDrivers(); i++) {
                     data = new Data(choice, taxiCenter, port, NULL, 0);
                     pthread_t t1;
                     int clientNum = server->acceptOneClient();
@@ -122,12 +131,12 @@ void Menu:: online(Grid* grid, int port) {
                     data->setSocket(server);
                     moves[clientNum] = new vector<int>;
                     acceptVect.push_back(data->getAccept());
-                    int status1 = pthread_create(&t1, NULL, clientRiciever, (void *) data);
+                    int status1 = pthread_create(&t1, NULL, clientCreat, (void *) data);
                     if(status1){
                         cout << "error" << endl;
                     }
                     sleep(1);
-                }
+                }*/
                 break;
             }
                 // create a trip
@@ -233,12 +242,20 @@ void Menu:: online(Grid* grid, int port) {
             }
                 // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
-                int i = 0;
-                int posInAcceptVec = 0;
-                vector<int>::iterator it;
-                for(it = acceptVect.begin() ; it < acceptVect.end(); it++,i++ ) {
-                    posInAcceptVec = acceptVect.at(i);
-                    moves.at(posInAcceptVec)->push_back(1);
+ /*               for ( int j = 0; j< moves.size(); j++) {
+
+                    while (!moves.at(j)->empty()) {
+
+                    }
+                }*/
+                if(!taxiCenter->getTrips().empty()) {
+                    int i = 0;
+                    int posInAcceptVec = 0;
+                    vector<int>::iterator it;
+                    for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
+                        posInAcceptVec = acceptVect.at(i);
+                        moves.at(posInAcceptVec)->push_back(1);
+                    }
                 }
         /*        for(int i=0;i<moves.size();i++){
                     moves.at(i)->push_back(1);
@@ -281,6 +298,27 @@ void Menu:: online(Grid* grid, int port) {
         delete taxiCenter;
 }
 
+void* Menu::clientCreat(void* info){
+    Data* data1;
+    Data* data;
+    data1 = (Data*)info;
+    for(int i = 0; i < data1->getNumOfDrivers(); i++) {
+        data = new Data(data1->getNumOfDrivers(),data1->getTaxiCenter(), data1->getPort(), data1->getSocket(),0);
+        pthread_t t2;
+        int clientNum = data->getSocket()->acceptOneClient();
+        data->setAccept(clientNum);
+        data->setSocket(data->getSocket());
+        moves[clientNum] = new vector<int>;
+        acceptVect.push_back(data->getAccept());
+        int status1 = pthread_create(&t2, NULL, clientRiciever, (void *) data);
+        if(status1){
+            cout << "error" << endl;
+        }
+        sleep(1);
+    }
+
+    return NULL;
+}
 void* Menu::clientRiciever(void* info){
     int ourTime = timer;
     State* newPosition;
@@ -556,3 +594,4 @@ void* Menu::tripRoute(void* info){
     cout << "u did it" << endl;
     return NULL;
 }
+
