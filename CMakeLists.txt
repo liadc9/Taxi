@@ -21,7 +21,7 @@ set(core_sockets src/Point.cpp src/Point.h
 
 
 add_executable(Main ${core_sockets} Main.cpp)
-add_executable(Client ${core_sockets} Client.cpp)
+add_executable(Client ${core_sockets} Client.cpp src/Menu.h)
 
 target_link_libraries(Main ${Boost_LIBRARIES})
 target_link_libraries(Client ${Boost_LIBRARIES})

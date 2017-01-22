@@ -24,6 +24,17 @@ public:
     void online(Grid* grid,int port);
     static void* clientRiciever(void* info);
     static void* tripRoute(void* info);
+
+private:
+/*    struct Data
+    {
+        int numOfDrivers;
+        TaxiCenter* taxiCenter;
+        int port;
+        Socket* socket;
+        int accept;
+    };*/
+
 };
 
 

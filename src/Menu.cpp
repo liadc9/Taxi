@@ -106,15 +106,16 @@ void Menu:: online(Grid* grid, int port) {
                 // get number of drivers to input for server side
                 cin >> choice;
                 cin.ignore();
-                data = new Data(choice, taxiCenter, port, NULL, 0);
-                int currentPort = data->getPort();
-                Socket* server = new Tcp(true, currentPort);
+//                data = new Data(choice, taxiCenter, port, NULL, 0);
+//                int currentPort = data->getPort();
+                Socket* server = new Tcp(true, port);
                 server->initialize();
                 pthread_mutex_init(&driverMutex,0);
                 pthread_mutex_init(&taxiMutex,0);
                 pthread_mutex_init(&luxMutex,0);
                 pthread_mutex_init(&tripsMutex,0);
                 for(int i = 0; i < data->getNumOfDrivers(); i++) {
+                    data = new Data(choice, taxiCenter, port, NULL, 0);
                     pthread_t t1;
                     int clientNum = server->acceptOneClient();
                     data->setAccept(clientNum);
@@ -237,8 +238,11 @@ void Menu:: online(Grid* grid, int port) {
                 vector<int>::iterator it;
                 for(it = acceptVect.begin() ; it < acceptVect.end(); it++,i++ ) {
                     posInAcceptVec = acceptVect.at(i);
-                    moves[posInAcceptVec]->push_back(1);
+                    moves.at(posInAcceptVec)->push_back(1);
                 }
+        /*        for(int i=0;i<moves.size();i++){
+                    moves.at(i)->push_back(1);
+                }*/
                 //THIS MUST STAY
                 timer++;
                 cout << timer << endl;
@@ -290,14 +294,13 @@ void* Menu::clientRiciever(void* info){
     int first =0;
     Data* data;
     data = (Data*)info;
+    int accept = data->getAccept();
     cout << "gal" << endl;
     Socket* serv = data->getSocket();
     TaxiCenter* center = data->getTaxiCenter();
     Driver *driver = new Driver(0, 0, 0, 0,NULL,
                                 Marride,NULL, false, 0);
     //wait for client to send driver
-    cout << "gal1" << endl;
-
     serv->receiveData(buffer, sizeof(buffer), data->getAccept());
     /*
      * deserialize buffer into driver object
@@ -360,7 +363,6 @@ void* Menu::clientRiciever(void* info){
             serial_str.clear();
         }
     }
-    cout << "ff1" << endl;
     xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
     yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
     /*
@@ -369,20 +371,21 @@ void* Menu::clientRiciever(void* info){
     cout << "ff" << endl;
     pthread_t bfsR;
     string ss;
-    serv->receiveData(buffer, sizeof(buffer), data->getAccept());
-    cout << "ff2" << endl;
+    serv->receiveData(buffer, sizeof(buffer), accept);
     std::string receive(buffer, sizeof(buffer));
-    sleep(10);
+   // sleep(10);
     wait++;
     wait2 = timer;
+    cout << "position of thread" << data->getAccept() << endl;
     while(choice != 7){
         while(wait != data->getNumOfDrivers()){
 
         }
-     //   if(choice == 9){
+           if(choice == 9){
+               /*
             while(wait2 != timer){
 
-            }
+            }*/
             if(!moves[data->getAccept()]->empty()) {
                 if (moves[data->getAccept()]->at(0) == 1) {
                     //if driver has no trip and it is time for a trip to begin assign driver a trip
@@ -416,7 +419,7 @@ void* Menu::clientRiciever(void* info){
                                         boost::archive::binary_oarchive oa(s);
                                         oa << route;
                                         s.flush();
-                                        serv->sendData(serial_str, data->getAccept());
+                                        serv->sendData(serial_str, accept);
                                         tripTime = route.size();
                                         startTime = trip->getTimeOfStart();
                                     } else {
@@ -448,7 +451,7 @@ void* Menu::clientRiciever(void* info){
                                     boost::archive::binary_oarchive oa(s);
                                     oa << route;
                                     s.flush();
-                                    serv->sendData(serial_str, data->getAccept());
+                                    serv->sendData(serial_str, accept);
                                     tripTime = route.size();
                                     startTime = trip->getTimeOfStart();
                                 }
@@ -458,7 +461,6 @@ void* Menu::clientRiciever(void* info){
                                 pthread_mutex_lock(&driverMutex);
                                 driver->setOnTrip(true);
                                 pthread_mutex_unlock(&driverMutex);
-                                ourTime++;
                                 break;
                             }
                         }
@@ -488,9 +490,8 @@ void* Menu::clientRiciever(void* info){
                         boost::archive::binary_oarchive oa(s);
                         oa << position;
                         s.flush();
-                        serv->sendData(serial_str, data->getAccept());
+                        serv->sendData(serial_str, accept);
                         serial_str.clear();
-                        ourTime++;
                         //WTF???????????????????????
                         //
                         // serv->receiveData(buffer, sizeof(buffer), data->getAccept());
@@ -509,23 +510,24 @@ void* Menu::clientRiciever(void* info){
                                 center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
-                                ourTime++;
                                 /*
                                  * deserialize buffer into string "waiting for move"
                                  */
                                 string ss;
-                                serv->receiveData(buffer, sizeof(buffer), data->getAccept());
+                                serv->receiveData(buffer, sizeof(buffer), accept);
                                 std::string receive(buffer, sizeof(buffer));
                             }
                         }
                     }
+
                     if(!moves[data->getAccept()]->empty()){
                         moves[data->getAccept()]->pop_back();
                     }
                     wait2++;
+                    ourTime++;
                 }
             }
-        //}
+        }
     }
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
@@ -536,7 +538,7 @@ void* Menu::clientRiciever(void* info){
     boost::archive::binary_oarchive oa(s);
     oa << endTransmission;
     s.flush();
-    serv->sendData(serial_str, data->getAccept());
+    serv->sendData(serial_str, accept);
     //close the socket
     delete serv;
     return NULL;
