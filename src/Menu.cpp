@@ -39,7 +39,9 @@ vector<int> acceptVect;
 int choice;
 int timer ;
 int wait = 0;
-int wait2 = 0;
+bool wait2 = false;
+bool wait3 = false;
+
 using namespace std;
 
 /**
@@ -123,20 +125,6 @@ void Menu:: online(Grid* grid, int port) {
                 while(choice != taxiCenter->getDrivers().size()){
 
                 }
-                /*for(int i = 0; i < data->getNumOfDrivers(); i++) {
-                    data = new Data(choice, taxiCenter, port, NULL, 0);
-                    pthread_t t1;
-                    int clientNum = server->acceptOneClient();
-                    data->setAccept(clientNum);
-                    data->setSocket(server);
-                    moves[clientNum] = new vector<int>;
-                    acceptVect.push_back(data->getAccept());
-                    int status1 = pthread_create(&t1, NULL, clientCreat, (void *) data);
-                    if(status1){
-                        cout << "error" << endl;
-                    }
-                    sleep(1);
-                }*/
                 break;
             }
                 // create a trip
@@ -268,6 +256,31 @@ void Menu:: online(Grid* grid, int port) {
                 // no default requirement
         }
     }
+    int i = 0;
+    int posInAcceptVec = 0;
+    vector<int>::iterator it;
+    bool finish = false;
+    while(!finish) {
+        finish = true;
+        for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
+            posInAcceptVec = acceptVect.at(i);
+            if (moves.at(posInAcceptVec)->size() != 0) {
+                finish = false;
+                break;
+            }
+        }
+    }
+    wait2 = true;
+while(!wait3){
+
+}
+        /*for(int k = 0; k < moves.size(); k++){
+            if(moves.at(k)->size() != 0){
+                finish = false;
+                break;
+            }
+        }*/
+
         // remove all taxis from memory if 7 is pressed
         for (int i = taxiCenter->getTaxis().size(); i > 0; i--) {
             StandardCab *cab = taxiCenter->getTaxis().at(i - 1);
@@ -421,13 +434,13 @@ void* Menu::clientRiciever(void* info){
         }
         int what = pthread_create(&tt,NULL,tripThread,(void*)data);
         pthread_join(tt,NULL);
-
+        cout << "ofww" << endl;
     }
-
+    cout << "of" << endl;
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
     //send the vector++
-
+    wait3 = true;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
     boost::archive::binary_oarchive oa(s);
@@ -567,6 +580,7 @@ void* Menu::tripThread(void* info){
                         /*
                          * create next move for driver and serialize new position
                          */
+                        serv->receiveData(buffer, sizeof(buffer), data->getAccept());
                         State *end = trip->getdest();
                         Grid *grid = trip->getGrid();
                         Driver *cabDriver = driver;
@@ -592,7 +606,7 @@ void* Menu::tripThread(void* info){
                         serial_str.clear();
                         //WTF???????????????????????
                         //
-                        // serv->receiveData(buffer, sizeof(buffer), data->getAccept());
+
                     }
                     //if we have reached end of route for the driver
                     if (ourTime <= (tripTime + startTime) && driver->isOnTrip() == true) {
@@ -632,13 +646,13 @@ void* Menu::tripThread(void* info){
                                 }
                                 ourTime++;
                                 cout << "inner outrime" << ourTime <<endl;
-                                break;
                                 /*
                                  * deserialize buffer into string "waiting for move"
                                  */
                                 string ss;
                                 serv->receiveData(buffer, sizeof(buffer), accept);
                                 std::string receive(buffer, sizeof(buffer));
+                                break;
                             }
                         }
                     }
@@ -651,159 +665,9 @@ void* Menu::tripThread(void* info){
                 }
             }
         }
+        if(wait2){
+            break;
+        }
     }
     return NULL;
 }
-
-
-
-/*
-        if(choice == 9){
-            if(!moves[data->getAccept()]->empty()) {
-                if (moves[data->getAccept()]->at(0) == 1) {
-                    if (!center->getTrips().empty()) {
-                        //if driver has no trip and it is time for a trip to begin assign driver a trip
-                        if (driver->isOnTrip() == false) {
-                            for (int i = 0; i < center->getTrips().size(); i++) {
-                                if (center->getTrips().at(i)->getHappening() == false) {
-                                    if (first == 0) {
-                                        if (center->getTrips().at(i)->getRide_id() == driver->getId()) {
-                                            trip = center->getTrips().at(i);
-                                            pthread_mutex_lock(&tripsMutex);
-                                            trip->setHappening(true);
-                                            pthread_mutex_unlock(&tripsMutex);
-                                            z = i;
-                                            first++;
-                                            *//*
-                                     * serialize route into buffer in order to send to client
-                                     *//*
-                                            //mutex//
-                                            int bfsStatus = pthread_create(&bfsR, NULL, tripRoute, (void *) trip);
-                                            if (bfsStatus) {
-                                                //error
-                                            }
-                                            int stat = pthread_join(bfsR, NULL);
-                                            pthread_mutex_lock(&tripsMutex);
-                                            route = trip->getRoute();
-                                            pthread_mutex_unlock(&tripsMutex);
-                                            std::string serial_str;
-                                            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                                            boost::iostreams::stream<boost::iostreams::
-                                            back_insert_device<std::string> > s(inserter);
-                                            boost::archive::binary_oarchive oa(s);
-                                            oa << route;
-                                            s.flush();
-                                            serv->sendData(serial_str, accept);
-                                            tripTime = route.size();
-                                            startTime = trip->getTimeOfStart();
-                                        } else {
-                                            continue;
-                                        }
-                                    } else if (center->getTrips().at(i)->getStart()->getState().getX() == xCor &&
-                                               center->getTrips().at(i)->getStart()->getState().getX() == yCor) {
-                                        trip = center->getTrips().at(i);
-                                        pthread_mutex_lock(&tripsMutex);
-                                        trip->setHappening(true);
-                                        pthread_mutex_unlock(&tripsMutex);
-                                        z = i;
-                                        *//*
-                                     * serialize route into buffer in order to send to client
-                                     *//*
-                                        //mutex//
-                                        int bfsStatus = pthread_create(&bfsR, NULL, tripRoute, (void *) trip);
-                                        if (bfsStatus) {
-                                            //error
-                                        }
-                                        int stat = pthread_join(bfsR, NULL);
-                                        pthread_mutex_lock(&tripsMutex);
-                                        vector<Point> route = trip->getRoute();
-                                        pthread_mutex_unlock(&tripsMutex);
-                                        std::string serial_str;
-                                        boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                                        boost::iostreams::stream<boost::iostreams::
-                                        back_insert_device<std::string> > s(inserter);
-                                        boost::archive::binary_oarchive oa(s);
-                                        oa << route;
-                                        s.flush();
-                                        serv->sendData(serial_str, accept);
-                                        tripTime = route.size();
-                                        startTime = trip->getTimeOfStart();
-                                    }
-                                }
-                                if (center->getTrips().at(i)->getHappening() == true) {
-                                    // if (trip->getTimeOfStart() == timer) {
-                                    pthread_mutex_lock(&driverMutex);
-                                    driver->setOnTrip(true);
-                                    pthread_mutex_unlock(&driverMutex);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (!center->getTrips().empty()) {
-                        // if the driver is in a trip
-                        if (driver->isOnTrip() == true && trip->getTimeOfStart() <= ourTime) {
-                            *//*
-                             * create next move for driver and serialize new position
-                             *//*
-                            State *end = trip->getdest();
-                            Grid *grid = trip->getGrid();
-                            Driver *cabDriver = driver;
-                            State *cabState = cabDriver->getTaxiCabInfo()->getLocation();
-                            pthread_mutex_lock(&taxiMutex);
-                            pthread_mutex_lock(&luxMutex);
-                            newPosition = cabDriver->getTaxiCabInfo()->move(cabState, route, grid);
-
-                            cout << "position of thread" << data->getAccept() << "is now"
-                                 << newPosition->getState().getX() << "," << newPosition->getState().getY() << endl;
-                            pthread_mutex_unlock(&luxMutex);
-                            pthread_mutex_unlock(&taxiMutex);
-                            //serialize newPosition as point
-                            Point *position = new Point(newPosition->getState().getX(),
-                                                        newPosition->getState().getY());
-                            std::string serial_str;
-                            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                            boost::iostreams::stream<boost::iostreams::
-                            back_insert_device<std::string> > s(inserter);
-                            boost::archive::binary_oarchive oa(s);
-                            oa << position;
-                            s.flush();
-                            serv->sendData(serial_str, accept);
-                            serial_str.clear();
-                            //WTF???????????????????????
-                            //
-                            // serv->receiveData(buffer, sizeof(buffer), data->getAccept());
-                        }
-                        //if we have reached end of route for the driver
-                        if (ourTime <= (tripTime + startTime) && driver->isOnTrip() == true) {
-                           if (trip->getTimeOfStart() < ourTime) {
-                                if (newPosition->getState().getX() == trip->getdest()->getState().getX() &&
-                                    newPosition->getState().getY() == trip->getdest()->getState().getY()) {
-                                    // after setting to false, next trip will override old trip info
-                                    pthread_mutex_lock(&driverMutex);
-                                    driver->setOnTrip(false);
-                                    pthread_mutex_unlock(&driverMutex);
-                                    //erase the trip
-                                    pthread_mutex_lock(&tripsMutex);
-                                    center->delTrip(z);
-                                    pthread_mutex_unlock(&tripsMutex);
-                                    delete trip;
-                                    *//*
-                                     * deserialize buffer into string "waiting for move"
-                                     *//*
-                                    string ss;
-                                    serv->receiveData(buffer, sizeof(buffer), accept);
-                                    std::string receive(buffer, sizeof(buffer));
-                                }
-                            }
-                        }
-
-                        if (!moves[data->getAccept()]->empty()) {
-                            moves[data->getAccept()]->pop_back();
-                        }
-                        wait2++;
-                        ourTime++;
-                    }
-                }
-            }
-        }*/

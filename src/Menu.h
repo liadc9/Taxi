@@ -16,7 +16,8 @@ extern vector<int> acceptVect;
 extern int choice;
 extern int timer;
 extern int wait;
-extern int wait2;
+extern bool wait2;
+extern bool wait3;
 
 class Menu {
 public:
