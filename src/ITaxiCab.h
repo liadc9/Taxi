@@ -84,7 +84,7 @@ public:
     void setLocation(State* location);
 
 
-    virtual State* move(State* start ,State* rideStart, Grid* grid) = 0;
+    virtual State* move(State* currentPos, vector<Point> route, Grid* grid) = 0;
 
     friend class boost::serialization::access;
     template<class Archive>

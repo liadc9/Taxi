@@ -12,7 +12,33 @@
  * @param rideStart - end position (pos of customer for start, or fin pos for ride)
  * @param grid - given grid.
  */
-State* LuxuryCab::move(State* start,State* rideStart, Grid* grid) {
+State* LuxuryCab::move(State* currentPos, vector<Point> route, Grid* grid) {
+    int i = 0;
+    Point posInRouteVetor;
+    vector<Point>::iterator it;
+    for (it = route.begin(); it < route.end(); it++, i++) {
+        posInRouteVetor.setX(route.at(i).getX());
+        posInRouteVetor.setY(route.at(i).getY());
+        if (currentPos->getState().getX() == posInRouteVetor.getX() &&
+            currentPos->getState().getY() == posInRouteVetor.getY()) {
+            int sizeLeft = route.size() - i;
+            if (sizeLeft < 2) {
+                posInRouteVetor.setX(route.at(i + 1).getX());
+                posInRouteVetor.setY(route.at(i + 1).getY());
+            } else {
+                posInRouteVetor.setX(route.at(i + 2).getX());
+                posInRouteVetor.setY(route.at(i + 2).getY());
+            }
+            State *cabNewState = grid->getState(posInRouteVetor.getX(), posInRouteVetor.getY());
+            setLocation(cabNewState);
+            return cabNewState;
+        }
+
+    }
+}
+
+/*
+
     int x;
     int y;
     // new trip
@@ -36,3 +62,4 @@ State* LuxuryCab::move(State* start,State* rideStart, Grid* grid) {
     setLocation(cabNewState);
     return cabNewState;
 }
+*/

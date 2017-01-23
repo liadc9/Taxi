@@ -18,7 +18,7 @@ public:
               int speed, State* location, bool hasDriver):ITaxiCab(Cab_ID,distance_made,color,
                                                     model,coeficient,speed,location, hasDriver){} ;
 
-    State* move(State* start ,State* rideStart, Grid* grid);
+    State* move(State* currentPos, vector<Point> route, Grid* grid);
     friend class boost::serialization::access;
     template<class Archive>
     void  serialize(Archive &ar, const unsigned int version)

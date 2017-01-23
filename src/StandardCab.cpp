@@ -11,7 +11,27 @@
  * @param rideStart - end position (pos of customer for start, or fin pos for ride)
  * @param grid - given grid.
  */
-State* StandardCab::move(State* start,State* rideStart, Grid* grid) {
+State* StandardCab::move(State* currentPos, vector<Point> route, Grid* grid) {
+
+    int i = 0;
+    Point posInRouteVetor;
+    vector<Point>::iterator it;
+    for (it = route.begin(); it < route.end(); it++, i++) {
+        posInRouteVetor.setX(route.at(i).getX());
+        posInRouteVetor.setY(route.at(i).getY());
+        if (currentPos->getState().getX() == posInRouteVetor.getX() &&
+            currentPos->getState().getY() == posInRouteVetor.getY()) {
+            posInRouteVetor.setX(route.at(i + 1).getX());
+            posInRouteVetor.setY(route.at(i + 1).getY());
+            State *cabNewState = grid->getState(posInRouteVetor.getX(), posInRouteVetor.getY());
+            setLocation(cabNewState);
+            return cabNewState;
+        }
+    }
+}
+
+/*
+
     // new trip
     Trip* trip = new Trip(start,rideStart,grid);
     // use BFS algorithm
@@ -25,4 +45,4 @@ State* StandardCab::move(State* start,State* rideStart, Grid* grid) {
     State* cabNewState = grid->getState(x,y);
     setLocation(cabNewState);
     return  cabNewState;
-}
+}*/

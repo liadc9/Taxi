@@ -449,7 +449,7 @@ void* Menu::clientRiciever(void* info){
                                             }
                                             int stat = pthread_join(bfsR, NULL);
                                             pthread_mutex_lock(&tripsMutex);
-                                            vector<Point> route = trip->getRoute();
+                                            route = trip->getRoute();
                                             pthread_mutex_unlock(&tripsMutex);
                                             std::string serial_str;
                                             boost::iostreams::back_insert_device<std::string> inserter(serial_str);
@@ -517,7 +517,8 @@ void* Menu::clientRiciever(void* info){
                             State *cabState = cabDriver->getTaxiCabInfo()->getLocation();
                             pthread_mutex_lock(&taxiMutex);
                             pthread_mutex_lock(&luxMutex);
-                            newPosition = cabDriver->getTaxiCabInfo()->move(cabState, end, grid);
+                            newPosition = cabDriver->getTaxiCabInfo()->move(cabState, route, grid);
+
                             cout << "position of thread" << data->getAccept() << "is now"
                                  << newPosition->getState().getX() << "," << newPosition->getState().getY() << endl;
                             pthread_mutex_unlock(&luxMutex);
@@ -607,6 +608,7 @@ void* Menu::tripThread(void* info){
     int tripTime;
     int startTime;
     int z;
+    vector<Point> route;
     pthread_t bfsR;
     Data* data;
     data = (Data*) info;
@@ -616,7 +618,9 @@ void* Menu::tripThread(void* info){
     int accept = data->getAccept();
     int xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
     int yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
-    if(choice == 9){
+    int stop = data->getNumOfDrivers();
+    int numOfTrips = center->getTrips().size();
+    while(!(center->getTrips().size() == (numOfTrips - stop))){
         if(!moves[data->getAccept()]->empty()) {
             if (moves[data->getAccept()]->at(0) == 1) {
                 if (!center->getTrips().empty()) {
@@ -642,7 +646,7 @@ void* Menu::tripThread(void* info){
                                         }
                                         int stat = pthread_join(bfsR, NULL);
                                         pthread_mutex_lock(&tripsMutex);
-                                        vector<Point> route = trip->getRoute();
+                                        route = trip->getRoute();
                                         pthread_mutex_unlock(&tripsMutex);
                                         std::string serial_str;
                                         boost::iostreams::back_insert_device<std::string> inserter(serial_str);
@@ -673,15 +677,17 @@ void* Menu::tripThread(void* info){
                                     z = i;
                                     /*
                                  * serialize route into buffer in order to send to client
-                                 */
+
                                     //mutex//
                                     int bfsStatus = pthread_create(&bfsR, NULL, tripRoute, (void *) trip);
                                     if (bfsStatus) {
                                         //error
                                     }
+
                                     int stat = pthread_join(bfsR, NULL);
+                                     */
                                     pthread_mutex_lock(&tripsMutex);
-                                    vector<Point> route = trip->getRoute();
+                                    route = trip->getRoute();
                                     pthread_mutex_unlock(&tripsMutex);
                                     std::string serial_str;
                                     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
@@ -717,7 +723,7 @@ void* Menu::tripThread(void* info){
                         State *cabState = cabDriver->getTaxiCabInfo()->getLocation();
                         pthread_mutex_lock(&taxiMutex);
                         pthread_mutex_lock(&luxMutex);
-                        newPosition = cabDriver->getTaxiCabInfo()->move(cabState, end, grid);
+                        newPosition = cabDriver->getTaxiCabInfo()->move(cabState, route, grid);
                         cout << "position of thread" << data->getAccept() << "is now"
                              << newPosition->getState().getX() << "," << newPosition->getState().getY() << endl;
                         pthread_mutex_unlock(&luxMutex);
@@ -740,7 +746,7 @@ void* Menu::tripThread(void* info){
                     }
                     //if we have reached end of route for the driver
                     if (ourTime <= (tripTime + startTime) && driver->isOnTrip() == true) {
-                        if (trip->getTimeOfStart() < ourTime) {
+                        if (trip->getTimeOfStart() <= ourTime) {
                             if (newPosition->getState().getX() == trip->getdest()->getState().getX() &&
                                 newPosition->getState().getY() == trip->getdest()->getState().getY()) {
                                 // after setting to false, next trip will override old trip info
