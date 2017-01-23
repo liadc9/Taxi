@@ -37,6 +37,7 @@ pthread_mutex_t tripsMutex;
 map<int,std::vector<int>*> moves;
 vector<int> acceptVect;
 int choice;
+int choice1 = 0;
 int timer ;
 int wait = 0;
 bool wait2 = false;
@@ -271,16 +272,9 @@ void Menu:: online(Grid* grid, int port) {
         }
     }
     wait2 = true;
-while(!wait3){
+    while(!acceptVect.empty()){
 
-}
-        /*for(int k = 0; k < moves.size(); k++){
-            if(moves.at(k)->size() != 0){
-                finish = false;
-                break;
-            }
-        }*/
-
+    }
         // remove all taxis from memory if 7 is pressed
         for (int i = taxiCenter->getTaxis().size(); i > 0; i--) {
             StandardCab *cab = taxiCenter->getTaxis().at(i - 1);
@@ -428,7 +422,7 @@ void* Menu::clientRiciever(void* info){
     wait++;
     pthread_t tt;
     cout << "position of thread" << data->getAccept() << endl;
-    while(choice != 7){
+    while(choice1 != 7){
         while(wait != data->getNumOfDrivers()){
 
         }
@@ -465,6 +459,12 @@ void* Menu::clientRiciever(void* info){
     oa << endTransmission;
     s.flush();
     serv->sendData(serial_str, accept);
+    for(int k = 0 ; k < data->getNumOfDrivers(); k++){
+        if(acceptVect.at(k) == data->getAccept()){
+            acceptVect.erase(acceptVect.begin() + k);
+            break;
+        }
+    }
     //close the socket
  //   delete serv;
     return NULL;
