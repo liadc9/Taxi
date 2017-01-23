@@ -96,6 +96,10 @@ void Menu:: online(Grid* grid, int port) {
     bool endOfRoute = false;
     choice = 0;
     timer = 0;
+    pthread_mutex_init(&driverMutex,0);
+    pthread_mutex_init(&taxiMutex,0);
+    pthread_mutex_init(&luxMutex,0);
+    pthread_mutex_init(&tripsMutex,0);
     // while program doesn't terminate
     while (choice != 7) {
         // get user input for choice
@@ -114,10 +118,6 @@ void Menu:: online(Grid* grid, int port) {
                 Socket* server = new Tcp(true, port);
                 server->initialize();
                 data = new Data(choice,taxiCenter,port,server,0,NULL);
-                pthread_mutex_init(&driverMutex,0);
-                pthread_mutex_init(&taxiMutex,0);
-                pthread_mutex_init(&luxMutex,0);
-                pthread_mutex_init(&tripsMutex,0);
                 int status1 = pthread_create(&t1, NULL, clientCreat, (void *) data);
                 if(status1){
                     cout << "error" << endl;
@@ -149,7 +149,9 @@ void Menu:: online(Grid* grid, int port) {
                 // create trip according to all info
                 Trip *trip = new Trip(id, start, end, grid, numPassengers,
                                       tariff, timeOfStart, false);
+                pthread_mutex_lock(&tripsMutex);
                 taxiCenter->AddTrip(trip);
+                pthread_mutex_unlock(&tripsMutex);
                 break;
             }
                 // create a cab
@@ -245,6 +247,7 @@ void Menu:: online(Grid* grid, int port) {
             }
                 // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
+
                 if(!taxiCenter->getTrips().empty()) {
                     int i = 0;
                     int posInAcceptVec = 0;
@@ -456,8 +459,7 @@ void* Menu::clientRiciever(void* info){
     cout << "of" << endl;
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
-    //send the vector++
-    wait3 = true;
+    //send the vector
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
     boost::archive::binary_oarchive oa(s);
@@ -513,6 +515,7 @@ void* Menu::tripThread(void* info){
                 if (!center->getTrips().empty()) {
                     //if driver has no trip and it is time for a trip to begin assign driver a trip
                     if (driver->isOnTrip() == false) {
+
                         for (int i = 0; i < center->getTrips().size(); i++) {
                             if (center->getTrips().at(i)->getHappening() == false) {
                                 if (first == 0) {
@@ -665,29 +668,28 @@ void* Menu::tripThread(void* info){
                                 //center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
-                                if(!moves[data->getAccept()]->empty()) {
+                                /*if(!moves[data->getAccept()]->empty()) {
                                     moves[data->getAccept()]->pop_back();
                                 }
                                 ourTime++;
-                                cout << "inner outrime" << ourTime <<endl;
+                                cout << "inner outrime" << ourTime <<endl;*/
                                 /*
                                  * deserialize buffer into string "waiting for move"
                                  */
                                 string ss;
                                 serv->receiveData(buffer, sizeof(buffer), accept);
                                 std::string receive(buffer, sizeof(buffer));
-                                break;
+                               // break;
                             }
                         }
                     }
-
-                    if (!moves[data->getAccept()]->empty()) {
-                        moves[data->getAccept()]->pop_back();
-                    }
-                    ourTime++;
-                    cout << "outer outrime" << ourTime <<endl;
                 }
             }
+            if (!moves[data->getAccept()]->empty()) {
+                moves[data->getAccept()]->pop_back();
+            }
+            ourTime++;
+            cout << "outer outrime" << ourTime <<endl;
         }
         if(wait2){
             Point *sof = new Point(-1,-1);
