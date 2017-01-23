@@ -259,7 +259,6 @@ void Menu:: online(Grid* grid, int port) {
                 }
 
                 timer++;
-                cout << timer << endl;
                 break;
             }
                 // no default requirement
@@ -347,7 +346,6 @@ void* Menu::clientRiciever(void* info){
     Data* data;
     data = (Data*)info;
     int accept = data->getAccept();
-    cout << "gal" << endl;
     Socket* serv = data->getSocket();
     TaxiCenter* center = data->getTaxiCenter();
     Driver *driver = new Driver(0, 0, 0, 0,NULL,
@@ -421,22 +419,19 @@ void* Menu::clientRiciever(void* info){
     /*
      * deeserialize buffer into string "waiting for move"
      */
-    cout << "ff" << endl;
     pthread_t bfsR;
     string ss;
     serv->receiveData(buffer, sizeof(buffer), accept);
     std::string receive(buffer, sizeof(buffer));
-   // sleep(10);
+
     wait++;
     pthread_t tt;
-    cout << "position of thread" << data->getAccept() << endl;
     while(choice1 != 7){
         while(wait != data->getNumOfDrivers()){
 
         }
         int what = pthread_create(&tt,NULL,tripThread,(void*)data);
         pthread_join(tt,NULL);
-        cout << "ofww" << endl;
         while(!moves.at(data->getAccept())->empty()){
             moves.at(data->getAccept())->pop_back();
         }
@@ -456,7 +451,6 @@ void* Menu::clientRiciever(void* info){
             }
         }
     }
-    cout << "of" << endl;
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
     //send the vector
@@ -473,7 +467,6 @@ void* Menu::clientRiciever(void* info){
         }
     }
     //close the socket
- //   delete serv;
     return NULL;
 }
 
@@ -483,7 +476,6 @@ void* Menu::tripRoute(void* info){
     BFS* bfs = new BFS(trip);
     vector<Point> route = bfs->AlgoRun();
     trip->setRoute(route);
-    cout << "u did it" << endl;
     return NULL;
 }
 
@@ -505,9 +497,6 @@ void* Menu::tripThread(void* info){
     Driver* driver = data->getDriver();
     int accept = data->getAccept();
     bool endWithTrip = false;
-    /*int stop = data->getNumOfDrivers();
-    int numOfTrips = center->getTrips().size();
-    !(center->getTrips().size() == (numOfTrips - stop))*/
     while(true){
         if(!moves[data->getAccept()]->empty()) {
             if (moves[data->getAccept()]->at(0) == 1) {
@@ -548,7 +537,6 @@ void* Menu::tripThread(void* info){
                                         tripTime = route.size();
                                         startTime = trip->getTimeOfStart();
                                         if (trip->getHappening() == true) {
-                                            // if (trip->getTimeOfStart() == timer) {
                                             pthread_mutex_lock(&driverMutex);
                                             driver->setOnTrip(true);
                                             pthread_mutex_unlock(&driverMutex);
@@ -591,7 +579,6 @@ void* Menu::tripThread(void* info){
                                     tripTime = route.size();
                                     startTime = trip->getTimeOfStart();
                                     if (trip->getHappening() == true) {
-                                        // if (trip->getTimeOfStart() == timer) {
                                         pthread_mutex_lock(&driverMutex);
                                         driver->setOnTrip(true);
                                         pthread_mutex_unlock(&driverMutex);
@@ -616,8 +603,6 @@ void* Menu::tripThread(void* info){
                         pthread_mutex_lock(&taxiMutex);
                         pthread_mutex_lock(&luxMutex);
                         newPosition = cabDriver->getTaxiCabInfo()->move(cabState, route, grid);
-                        cout << "position of thread" << data->getAccept() << "is now"
-                             << newPosition->getState().getX() << "," << newPosition->getState().getY() << endl;
                         pthread_mutex_unlock(&luxMutex);
                         pthread_mutex_unlock(&taxiMutex);
                         //serialize newPosition as point
@@ -633,8 +618,6 @@ void* Menu::tripThread(void* info){
                         serv->sendData(serial_str, accept);
                         serial_str.clear();
                         endWithTrip == false;
-                        //WTF???????????????????????
-                        //
 
                     }
                     //if we have reached end of route for the driver
@@ -667,15 +650,10 @@ void* Menu::tripThread(void* info){
                                         }
                                     }
                                 }
-                                //center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
                                 endWithTrip = true;
-                                /*if(!moves[data->getAccept()]->empty()) {
-                                    moves[data->getAccept()]->pop_back();
-                                }
-                                ourTime++;
-                                cout << "inner outrime" << ourTime <<endl;*/
+
                                 /*
                                  * deserialize buffer into string "waiting for move"
                                  */
@@ -692,7 +670,6 @@ void* Menu::tripThread(void* info){
                 moves[data->getAccept()]->pop_back();
             }
             ourTime++;
-            cout << "outer outrime" << ourTime <<endl;
         }
         if(wait2){
             if(endWithTrip == false){
