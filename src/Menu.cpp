@@ -320,7 +320,6 @@ void* Menu::clientCreat(void* info){
     return NULL;
 }
 void* Menu::clientRiciever(void* info){
-    int ourTime = timer;
     State* newPosition;
     char buffer[1024];
     Trip *trip;
@@ -601,7 +600,7 @@ void* Menu::tripRoute(void* info){
 
 void* Menu::tripThread(void* info){
     int first = 0;
-    int ourTime = timer;
+    int ourTime = 0;
     State* newPosition;
     char buffer[1024];
     Trip *trip;
@@ -755,13 +754,21 @@ void* Menu::tripThread(void* info){
                                 pthread_mutex_unlock(&driverMutex);
                                 //erase the trip
                                 pthread_mutex_lock(&tripsMutex);
-                                center->delTrip(z);
+                                for (int i =0; i < center->getTrips().size(); i++){
+                                    if(center->getTrips().at(i)->getRide_id() == trip->getRide_id()){
+                                        if(center->getTrips().at(i)->getHappening() == trip->getHappening()){
+                                            center->delTrip(i);
+                                        }
+                                    }
+                                }
+                                //center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
                                 if(!moves[data->getAccept()]->empty()) {
                                     moves[data->getAccept()]->pop_back();
                                 }
                                 ourTime++;
+                                cout << "inner outrime" << ourTime <<endl;
                                 break;
                                 /*
                                  * deserialize buffer into string "waiting for move"
@@ -777,6 +784,7 @@ void* Menu::tripThread(void* info){
                         moves[data->getAccept()]->pop_back();
                     }
                     ourTime++;
+                    cout << "outer outrime" << ourTime <<endl;
                 }
             }
         }
