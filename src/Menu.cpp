@@ -231,12 +231,7 @@ void Menu:: online(Grid* grid, int port) {
             }
                 // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
- /*               for ( int j = 0; j< moves.size(); j++) {
 
-                    while (!moves.at(j)->empty()) {
-
-                    }
-                }*/
                 if(!taxiCenter->getTrips().empty()) {
                     int i = 0;
                     int posInAcceptVec = 0;
@@ -246,9 +241,20 @@ void Menu:: online(Grid* grid, int port) {
                         moves.at(posInAcceptVec)->push_back(1);
                     }
                 }
-        /*        for(int i=0;i<moves.size();i++){
-                    moves.at(i)->push_back(1);
-                }*/
+                int i = 0;
+                int posInAcceptVec = 0;
+                vector<int>::iterator it;
+                bool finish = false;
+                while(!finish) {
+                    finish = true;
+                    for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
+                        posInAcceptVec = acceptVect.at(i);
+                        if (moves.at(posInAcceptVec)->size() != 0) {
+                            finish = false;
+                            break;
+                        }
+                    }
+                }
                 //THIS MUST STAY
                 timer++;
                 cout << timer << endl;
