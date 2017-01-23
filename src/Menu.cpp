@@ -417,7 +417,7 @@ void* Menu::clientRiciever(void* info){
     xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
     yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
     /*
-     * deserialize buffer into string "waiting for move"
+     * deeserialize buffer into string "waiting for move"
      */
     cout << "ff" << endl;
     pthread_t bfsR;
