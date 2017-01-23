@@ -100,6 +100,7 @@ void Menu:: online(Grid* grid, int port) {
     pthread_mutex_init(&taxiMutex,0);
     pthread_mutex_init(&luxMutex,0);
     pthread_mutex_init(&tripsMutex,0);
+    Socket* server = new Tcp(true, port);
     // while program doesn't terminate
     while (choice != 7) {
         // get user input for choice
@@ -115,7 +116,6 @@ void Menu:: online(Grid* grid, int port) {
                 cin.ignore();
 //                data = new Data(choice, taxiCenter, port, NULL, 0);
 //                int currentPort = data->getPort();
-                Socket* server = new Tcp(true, port);
                 server->initialize();
                 data = new Data(choice,taxiCenter,port,server,0,NULL);
                 int status1 = pthread_create(&t1, NULL, clientCreat, (void *) data);
@@ -310,6 +310,7 @@ void Menu:: online(Grid* grid, int port) {
             taxiCenter->getTrips().pop_back();
         }
         delete taxiCenter;
+    delete server;
 }
 
 void* Menu::clientCreat(void* info){
