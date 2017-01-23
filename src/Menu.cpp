@@ -203,6 +203,20 @@ void Menu:: online(Grid* grid, int port) {
             }
                 //get position of driver
             case 4 : {
+                int i = 0;
+                int posInAcceptVec = 0;
+                vector<int>::iterator it;
+                bool finish = false;
+                while(!finish) {
+                    finish = true;
+                    for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
+                        posInAcceptVec = acceptVect.at(i);
+                        if (moves.at(posInAcceptVec)->size() != 0) {
+                            finish = false;
+                            break;
+                        }
+                    }
+                }
                 // find driver position
                 int cabDriver;
                 cin >> cabDriver;
@@ -241,21 +255,7 @@ void Menu:: online(Grid* grid, int port) {
                         moves.at(posInAcceptVec)->push_back(1);
                     }
                 }
-                int i = 0;
-                int posInAcceptVec = 0;
-                vector<int>::iterator it;
-                bool finish = false;
-                while(!finish) {
-                    finish = true;
-                    for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
-                        posInAcceptVec = acceptVect.at(i);
-                        if (moves.at(posInAcceptVec)->size() != 0) {
-                            finish = false;
-                            break;
-                        }
-                    }
-                }
-                //THIS MUST STAY
+
                 timer++;
                 cout << timer << endl;
                 break;
