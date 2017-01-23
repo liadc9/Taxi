@@ -437,6 +437,9 @@ void* Menu::clientRiciever(void* info){
         cout << "ofww" << endl;
     }
     cout << "of" << endl;
+    while(!moves.at(data->getAccept())->empty()){
+        moves.at(data->getAccept())->pop_back();
+    }
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
     //send the vector++
