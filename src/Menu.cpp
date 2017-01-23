@@ -245,7 +245,6 @@ void Menu:: online(Grid* grid, int port) {
             }
                 // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
-
                 if(!taxiCenter->getTrips().empty()) {
                     int i = 0;
                     int posInAcceptVec = 0;
@@ -663,7 +662,7 @@ void* Menu::tripThread(void* info){
                                         }
                                     }
                                 }
-                                ///center->delTrip(z);
+                                //center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
                                 if(!moves[data->getAccept()]->empty()) {
