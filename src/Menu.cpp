@@ -663,7 +663,7 @@ void* Menu::tripThread(void* info){
                                         }
                                     }
                                 }
-                                //center->delTrip(z);
+                                ///center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
                                 if(!moves[data->getAccept()]->empty()) {
