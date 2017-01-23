@@ -499,9 +499,10 @@ void* Menu::tripThread(void* info){
     int accept = data->getAccept();
     int xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
     int yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
-    int stop = data->getNumOfDrivers();
+    /*int stop = data->getNumOfDrivers();
     int numOfTrips = center->getTrips().size();
-    while(!(center->getTrips().size() == (numOfTrips - stop))){
+    !(center->getTrips().size() == (numOfTrips - stop))*/
+    while(true){
         if(!moves[data->getAccept()]->empty()) {
             if (moves[data->getAccept()]->at(0) == 1) {
                 if (!center->getTrips().empty()) {

@@ -135,7 +135,6 @@ int main(int argc, char *argv[]) {
             serial_str.clear();
             // if the vector is empty we delete client and end transmission
             if(tripRoute.empty()){
-                delete client;
                 break;
             }
 
