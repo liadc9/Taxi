@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     int vehicle;
     int taxi_type;
     int taxiID;
-    char buffer[1024];
+    char buffer[65536];
     vector<Point> tripRoute;
     // open new socket at correct port
     Socket* client = new Tcp(false, atoi(argv[2]));

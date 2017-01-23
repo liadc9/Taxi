@@ -45,7 +45,7 @@ BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
  */
 int main(int argc, char *argv[]) {
     int port = atoi(argv[1]);
-    char buffer[1024];
+    char buffer[65536];
 
     // get grid input from user
     string gridInput;

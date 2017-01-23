@@ -335,7 +335,7 @@ void* Menu::clientCreat(void* info){
 }
 void* Menu::clientRiciever(void* info){
     State* newPosition;
-    char buffer[1024];
+    char buffer[65536];
     Trip *trip;
     int tripTime;
     int startTime;
@@ -483,7 +483,7 @@ void* Menu::tripThread(void* info){
     int first = 0;
     int ourTime = 0;
     State* newPosition;
-    char buffer[1024];
+    char buffer[65536];
     Trip *trip;
     int tripTime;
     int startTime;
