@@ -165,6 +165,11 @@ int main(int argc, char *argv[]) {
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device);
                 boost::archive::binary_iarchive ia(s4);
                 ia >> location;
+                if((location->getX() == -1) && (location->getY() == -1)){
+                    driver->setOnTrip(false);
+                    go = true;
+                    break;
+                }
                 taxi->getLocation()->getState().setX(location->getX());
                 taxi->getLocation()->getState().setY(location->getY());
                 //check if we reached end of trip
@@ -178,5 +183,5 @@ int main(int argc, char *argv[]) {
 
             }
     }
-
+    delete client;
 }

@@ -684,6 +684,16 @@ void* Menu::tripThread(void* info){
             }
         }
         if(wait2){
+            Point *sof = new Point(-1,-1);
+            std::string serial_str;
+            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+            boost::iostreams::stream<boost::iostreams::
+            back_insert_device<std::string> > s(inserter);
+            boost::archive::binary_oarchive oa(s);
+            oa << sof;
+            s.flush();
+            serv->sendData(serial_str, accept);
+            serial_str.clear();
             break;
         }
     }
