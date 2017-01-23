@@ -756,8 +756,20 @@ void* Menu::tripThread(void* info){
                                 pthread_mutex_lock(&tripsMutex);
                                 for (int i =0; i < center->getTrips().size(); i++){
                                     if(center->getTrips().at(i)->getRide_id() == trip->getRide_id()){
-                                        if(center->getTrips().at(i)->getHappening() == trip->getHappening()){
-                                            center->delTrip(i);
+                                        if(center->getTrips().at(i)->getHappening() == trip->getHappening()) {
+                                            if (center->getTrips().at(i)->getStart()->getState().getX() ==
+                                                trip->getStart()->getState().getX()) {
+                                                if (center->getTrips().at(i)->getStart()->getState().getY() ==
+                                                    trip->getStart()->getState().getY()) {
+                                                    if (center->getTrips().at(i)->getdest()->getState().getX() ==
+                                                        trip->getdest()->getState().getX()) {
+                                                        if (center->getTrips().at(i)->getdest()->getState().getY() ==
+                                                            trip->getdest()->getState().getY()) {
+                                                            center->delTrip(i);
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
