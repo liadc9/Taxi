@@ -758,6 +758,11 @@ void* Menu::tripThread(void* info){
                                 center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
+                                if(!moves[data->getAccept()]->empty()) {
+                                    moves[data->getAccept()]->pop_back();
+                                }
+                                ourTime++;
+                                break;
                                 /*
                                  * deserialize buffer into string "waiting for move"
                                  */
