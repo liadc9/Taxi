@@ -206,17 +206,7 @@ void Menu:: online(Grid* grid, int port) {
                 // find driver position
                 int cabDriver;
                 cin >> cabDriver;
-                if(!taxiCenter->getDrivers().empty()) {
-                    int i = 0;
-                    int posInAcceptVec = 0;
-                    vector<int>::iterator it;
-                    for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
-                        posInAcceptVec = acceptVect.at(i);
-                        moves.at(posInAcceptVec)->push_back(4);
-                        moves.at(posInAcceptVec)->push_back(cabDriver);
-                    }
-                }
-               /* // get the driver accorind to id.
+                // get the driver accorind to id.
                 ITaxiCab *cablocate = taxiCenter->getDrivers()
                         .at((unsigned int) cabDriver)->getTaxiCabInfo();
                 int x = cablocate->getLocation()->getState().getX();
@@ -226,7 +216,7 @@ void Menu:: online(Grid* grid, int port) {
 
                 cout << *pos << endl;
 
-                delete pos;*/
+                delete pos;
                 break;
             }
                 // take all drivers to final trip position
@@ -241,15 +231,24 @@ void Menu:: online(Grid* grid, int port) {
             }
                 // move one step forward in timer - will move drivers on grid during trips
             case 9 : {
+ /*               for ( int j = 0; j< moves.size(); j++) {
+
+                    while (!moves.at(j)->empty()) {
+
+                    }
+                }*/
                 if(!taxiCenter->getTrips().empty()) {
                     int i = 0;
                     int posInAcceptVec = 0;
                     vector<int>::iterator it;
                     for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
                         posInAcceptVec = acceptVect.at(i);
-                        moves.at(posInAcceptVec)->push_back(-1);
+                        moves.at(posInAcceptVec)->push_back(1);
                     }
                 }
+        /*        for(int i=0;i<moves.size();i++){
+                    moves.at(i)->push_back(1);
+                }*/
                 //THIS MUST STAY
                 timer++;
                 cout << timer << endl;
@@ -500,9 +499,12 @@ void* Menu::tripThread(void* info){
     int accept = data->getAccept();
     int xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
     int yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
+    /*int stop = data->getNumOfDrivers();
+    int numOfTrips = center->getTrips().size();
+    !(center->getTrips().size() == (numOfTrips - stop))*/
     while(true){
         if(!moves[data->getAccept()]->empty()) {
-            if (moves[data->getAccept()]->at(0) == -1) {
+            if (moves[data->getAccept()]->at(0) == 1) {
                 if (!center->getTrips().empty()) {
                     //if driver has no trip and it is time for a trip to begin assign driver a trip
                     if (driver->isOnTrip() == false) {
@@ -557,6 +559,14 @@ void* Menu::tripThread(void* info){
                                     z = i;
                                     /*
                                  * serialize route into buffer in order to send to client
+
+                                    //mutex//
+                                    int bfsStatus = pthread_create(&bfsR, NULL, tripRoute, (void *) trip);
+                                    if (bfsStatus) {
+                                        //error
+                                    }
+
+                                    int stat = pthread_join(bfsR, NULL);
                                      */
                                     pthread_mutex_lock(&tripsMutex);
                                     route = trip->getRoute();
@@ -613,6 +623,8 @@ void* Menu::tripThread(void* info){
                         s.flush();
                         serv->sendData(serial_str, accept);
                         serial_str.clear();
+                        //WTF???????????????????????
+                        //
 
                     }
                     //if we have reached end of route for the driver
@@ -649,7 +661,7 @@ void* Menu::tripThread(void* info){
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
                                 if(!moves[data->getAccept()]->empty()) {
-                                    moves[data->getAccept()]->erase(moves[data->getAccept()]->begin());
+                                    moves[data->getAccept()]->pop_back();
                                 }
                                 ourTime++;
                                 cout << "inner outrime" << ourTime <<endl;
@@ -665,30 +677,12 @@ void* Menu::tripThread(void* info){
                     }
 
                     if (!moves[data->getAccept()]->empty()) {
-                        moves[data->getAccept()]->erase(moves[data->getAccept()]->begin());
+                        moves[data->getAccept()]->pop_back();
                     }
                     ourTime++;
                     cout << "outer outrime" << ourTime <<endl;
                 }
             }
-            if(moves[data->getAccept()]->at(0) != -1) {
-                if (moves[data->getAccept()]->at(0) == 4) {
-                    moves[data->getAccept()]->erase(moves[data->getAccept()]->begin());
-                    for (int a = 0; a < moves[data->getAccept()]->size(); a++) {
-                        int ourId = moves[data->getAccept()]->at(0);
-                        moves[data->getAccept()]->erase(moves[data->getAccept()]->begin());
-                        if (center->getDrivers().at(ourId)->getId() == driver->getId()){
-                            int x = driver->getTaxiCabInfo()->getLocation()->getState().getX();
-                            int y = driver->getTaxiCabInfo()->getLocation()->getState().getY();
-                            Point *pos = new Point(x, y);
-                            cout << *pos << endl;
-                            delete pos;
-                            break;
-                        }
-                    }
-                }
-            }
-
         }
         if(wait2){
             Point *sof = new Point(-1,-1);
