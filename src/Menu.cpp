@@ -435,11 +435,26 @@ void* Menu::clientRiciever(void* info){
         int what = pthread_create(&tt,NULL,tripThread,(void*)data);
         pthread_join(tt,NULL);
         cout << "ofww" << endl;
+        while(!moves.at(data->getAccept())->empty()){
+            moves.at(data->getAccept())->pop_back();
+        }
+        break;
+    }
+    int i = 0;
+    int posInAcceptVec = 0;
+    vector<int>::iterator it;
+    bool finish = false;
+    while(!finish) {
+        finish = true;
+        for (it = acceptVect.begin(); it < acceptVect.end(); it++, i++) {
+            posInAcceptVec = acceptVect.at(i);
+            if (moves.at(posInAcceptVec)->size() != 0) {
+                finish = false;
+                break;
+            }
+        }
     }
     cout << "of" << endl;
-    while(!moves.at(data->getAccept())->empty()){
-        moves.at(data->getAccept())->pop_back();
-    }
     // create vector empty of points to assure of end transmission
     vector<Point> endTransmission;
     //send the vector++
@@ -451,7 +466,7 @@ void* Menu::clientRiciever(void* info){
     s.flush();
     serv->sendData(serial_str, accept);
     //close the socket
-    delete serv;
+ //   delete serv;
     return NULL;
 }
 

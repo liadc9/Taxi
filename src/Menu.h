@@ -13,7 +13,7 @@
 
 extern map<int,vector<int>*> moves;
 extern vector<int> acceptVect;
-extern int choice;
+extern int choice1;
 extern int timer;
 extern int wait;
 extern bool wait2;
