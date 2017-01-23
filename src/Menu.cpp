@@ -504,8 +504,7 @@ void* Menu::tripThread(void* info){
     TaxiCenter* center = data->getTaxiCenter();
     Driver* driver = data->getDriver();
     int accept = data->getAccept();
-    int xCor = driver->getTaxiCabInfo()->getLocation()->getState().getX();
-    int yCor = driver->getTaxiCabInfo()->getLocation()->getState().getY();
+    bool endWithTrip = false;
     /*int stop = data->getNumOfDrivers();
     int numOfTrips = center->getTrips().size();
     !(center->getTrips().size() == (numOfTrips - stop))*/
@@ -558,16 +557,18 @@ void* Menu::tripThread(void* info){
                                     } else {
                                         continue;
                                     }
-                                } else if (center->getTrips().at(i)->getStart()->getState().getX() == xCor &&
-                                           center->getTrips().at(i)->getStart()->getState().getX() == yCor) {
+                                } else if (center->getTrips().at(i)->getStart()->getState().getX()
+                                           == driver->getTaxiCabInfo()->getLocation()->getState().getX() &&
+                                           center->getTrips().at(i)->getStart()->getState().getY()
+                                           == driver->getTaxiCabInfo()->getLocation()->getState().getY()) {
                                     trip = center->getTrips().at(i);
                                     pthread_mutex_lock(&tripsMutex);
                                     trip->setHappening(true);
                                     pthread_mutex_unlock(&tripsMutex);
                                     z = i;
                                     /*
-                                 * serialize route into buffer in order to send to client
-
+                                    * serialize route into buffer in order to send to client
+                                    */
                                     //mutex//
                                     int bfsStatus = pthread_create(&bfsR, NULL, tripRoute, (void *) trip);
                                     if (bfsStatus) {
@@ -575,7 +576,7 @@ void* Menu::tripThread(void* info){
                                     }
 
                                     int stat = pthread_join(bfsR, NULL);
-                                     */
+
                                     pthread_mutex_lock(&tripsMutex);
                                     route = trip->getRoute();
                                     pthread_mutex_unlock(&tripsMutex);
@@ -631,6 +632,7 @@ void* Menu::tripThread(void* info){
                         s.flush();
                         serv->sendData(serial_str, accept);
                         serial_str.clear();
+                        endWithTrip == false;
                         //WTF???????????????????????
                         //
 
@@ -668,6 +670,7 @@ void* Menu::tripThread(void* info){
                                 //center->delTrip(z);
                                 pthread_mutex_unlock(&tripsMutex);
                                 delete trip;
+                                endWithTrip = true;
                                 /*if(!moves[data->getAccept()]->empty()) {
                                     moves[data->getAccept()]->pop_back();
                                 }
@@ -692,17 +695,22 @@ void* Menu::tripThread(void* info){
             cout << "outer outrime" << ourTime <<endl;
         }
         if(wait2){
-            Point *sof = new Point(-1,-1);
-            std::string serial_str;
-            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-            boost::iostreams::stream<boost::iostreams::
-            back_insert_device<std::string> > s(inserter);
-            boost::archive::binary_oarchive oa(s);
-            oa << sof;
-            s.flush();
-            serv->sendData(serial_str, accept);
-            serial_str.clear();
-            break;
+            if(endWithTrip == false){
+                Point *sof = new Point(-1,-1);
+                std::string serial_str;
+                boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+                boost::iostreams::stream<boost::iostreams::
+                back_insert_device<std::string> > s(inserter);
+                boost::archive::binary_oarchive oa(s);
+                oa << sof;
+                s.flush();
+                serv->sendData(serial_str, accept);
+                serial_str.clear();
+                break;
+            }
+            else{
+                break;
+            }
         }
     }
     return NULL;
