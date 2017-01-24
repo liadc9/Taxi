@@ -52,6 +52,10 @@ public:
 
     int getId();
 
+    int getTaxiID();
+
+    void setTaxiID(int taxiID);
+
     int getAge();
 
     int getExperience();

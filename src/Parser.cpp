@@ -27,7 +27,8 @@ Parser:: Parser(){
  */
 vector<boost::any> Parser:: DataSplit(string str) {
 
-    int isNum = NULL;
+    int isNum = 0;
+    int calculate = NULL;
     char isChar = NULL;
     int curentNum = 0;
     double dub = 0;
@@ -72,8 +73,10 @@ vector<boost::any> Parser:: DataSplit(string str) {
                 isChar = str[j];
             } else if (isdigit(str[j]) && curentNum != 6) {
                 // -48 for ASCII value, uses power to get the exct size
-                isNum = isNum + ((int) str[j] - 48);
-                isNum = isNum * (int) (pow(10, seperator - j - 1));
+                calculate = ((int) str[j] - 48);
+                calculate = calculate * (int) (pow(10, seperator - j - 1));
+                isNum += calculate;
+                calculate = 0;
                 // the only case we need a double is one specific time:
             } else if (isdigit(str[j]) && curentNum == 6){
                 string dummy = str;

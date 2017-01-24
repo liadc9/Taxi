@@ -1,6 +1,3 @@
-//
-// Created by gal on 30/11/16.
-//
 
 #ifndef FAST_TEXI_TAXICENTER_H
 #define FAST_TEXI_TAXICENTER_H

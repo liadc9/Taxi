@@ -32,8 +32,7 @@ private:
     int meter_passed;
     int timeOfStart;
     bool happening;
-
-private:
+    vector<Point> route;
     State* start;
     State* stop;
     Grid* grid;
@@ -53,6 +52,10 @@ public:
     double getTariff();
 
     bool getHappening();
+
+    void setRoute(vector<Point> route);
+
+    vector<Point> getRoute() ;
 
     void setHappening(bool happening);
 

@@ -15,7 +15,7 @@
 #include "src/TaxiCenter.h"
 #include <boost/any.hpp>
 #include "src/Menu.h"
-#include "src/sockets/Udp.h"
+#include "src/sockets/Tcp.h"
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/tokenizer.hpp>
@@ -44,9 +44,8 @@ BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
  * @return null;
  */
 int main(int argc, char *argv[]) {
-    Socket* socket = new Udp(true, IP, atoi(argv[1]));
-    socket->initialize();
-    char buffer[1024];
+    int port = atoi(argv[1]);
+    char buffer[65536];
 
     // get grid input from user
     string gridInput;
@@ -100,27 +99,7 @@ int main(int argc, char *argv[]) {
     }
     // call the menu for different input options
     Menu* menu = new Menu();
-    menu->online(grid, socket);
-
-    /**
-    * deserialize buffer into string "waiting for move"
-    */
-    string ss;
-    socket->reciveData(buffer, sizeof(buffer));
-    std::string receive(buffer, sizeof(buffer));
-    // create vector empty of points to assure of end transmission
-    vector<Point> endTransmission;
-    //send the vector
-    std::string serial_str;
-    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-    boost::archive::binary_oarchive oa(s);
-    oa << endTransmission;
-    s.flush();
-    socket->sendData(serial_str);
-
-    //close the socket
-    delete socket;
+    menu->online(grid, port);
 
     // frees memory before exiting the program.
     delete grid;

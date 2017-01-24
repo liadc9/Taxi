@@ -142,3 +142,11 @@ bool Driver::isOnTrip() {
 void Driver::setOnTrip(bool onTrip) {
     Driver::onTrip = onTrip;
 }
+
+int Driver::getTaxiID(){
+    return taxiID;
+}
+
+void Driver::setTaxiID(int taxiID) {
+    Driver::taxiID = taxiID;
+}

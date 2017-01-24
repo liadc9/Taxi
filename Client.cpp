@@ -1,5 +1,5 @@
 /**
- * This is the Client side application
+ * This is the Client side application.
  */
 #include <iostream>
 #include <fstream>
@@ -8,6 +8,7 @@
 #include <boost/any.hpp>
 #include "src/sockets/Socket.h"
 #include "src/sockets/Udp.h"
+#include "src/sockets/Tcp.h"
 #include "src/Parser.h"
 #include "src/Driver.h"
 #include "src/BFS.h"
@@ -50,10 +51,10 @@ int main(int argc, char *argv[]) {
     int vehicle;
     int taxi_type;
     int taxiID;
-    char buffer[1024];
+    char buffer[65536];
     vector<Point> tripRoute;
     // open new socket at correct port
-    Socket* client = new Udp(false, argv[1], atoi(argv[2]));
+    Socket* client = new Tcp(false, atoi(argv[2]));
     client->initialize();
 
     // get driver input from user
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]) {
     // parse the driver data
     parsedData = parse.DataSplit(driverString);
 
-    //create status for sriver
+    //create status for driver
     Status stat;
 
     // properly receive all data from parser
@@ -100,13 +101,14 @@ int main(int argc, char *argv[]) {
     boost::archive::binary_oarchive oa(s);
     oa << driver;
     s.flush();
-    client->sendData(serial_str);
+    // send driver to server
+    client->sendData(serial_str, 0);
     serial_str.clear();
 
 
 //deserialize to taxi
     ITaxiCab* taxi;
-    client->reciveData(buffer, sizeof(buffer));
+    client->receiveData(buffer, sizeof(buffer), 0);
     string serial_str2(buffer, sizeof(buffer));
     boost::iostreams::basic_array_source<char> device(serial_str2.c_str(), serial_str2.size());
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -121,10 +123,10 @@ int main(int argc, char *argv[]) {
     // this loop is used to send the data while we are on a trip
     while( go == false) {
             std::string sttt = "waiting for trip";
-            client->sendData(sttt);
+            client->sendData(sttt, 0);
             //deserialize to trip
             vector<Point> tripRoute;
-            client->reciveData(buffer, sizeof(buffer));
+            client->receiveData(buffer, sizeof(buffer), 0);
             string serial_str2(buffer, sizeof(buffer));
             boost::iostreams::basic_array_source<char> device(serial_str2.c_str(), serial_str2.size());
             boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -133,7 +135,6 @@ int main(int argc, char *argv[]) {
             serial_str.clear();
             // if the vector is empty we delete client and end transmission
             if(tripRoute.empty()){
-                delete client;
                 break;
             }
 
@@ -151,11 +152,11 @@ int main(int argc, char *argv[]) {
                 boost::archive::binary_oarchive oa(s);
                 oa << go;
                 s.flush();
-                client->sendData(serial3_str);
+                client->sendData(serial3_str, 0); // not used on first iteration, is reached at all??? liadddddd
                 serial3_str.clear();
 
-                //recevieng correct new location from server to diserialize
-                client->reciveData(buffer, sizeof(buffer));
+                //receiving correct new location from server to diserialize
+                client->receiveData(buffer, sizeof(buffer), 0);
                 //deserialize location as point
                 Point *location;
                 std::string locationStr(buffer, sizeof(buffer));
@@ -163,6 +164,11 @@ int main(int argc, char *argv[]) {
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device);
                 boost::archive::binary_iarchive ia(s4);
                 ia >> location;
+                if((location->getX() == -1) && (location->getY() == -1)){
+                    driver->setOnTrip(false);
+                    go = true;
+                    break;
+                }
                 taxi->getLocation()->getState().setX(location->getX());
                 taxi->getLocation()->getState().setY(location->getY());
                 //check if we reached end of trip
@@ -176,5 +182,5 @@ int main(int argc, char *argv[]) {
 
             }
     }
-
+    delete client;
 }
