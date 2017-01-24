@@ -309,7 +309,7 @@ void Menu:: online(Grid* grid, int port) {
             delete trip;
             taxiCenter->getTrips().pop_back();
         }
-        delete taxiCenter;
+    delete taxiCenter;
     delete server;
 }
 
