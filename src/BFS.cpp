@@ -66,7 +66,8 @@ vector<Point> BFS::AlgoRun(){
          *  is our current node and we mark them.
          */
         for(i = 0; i < neighborList.size();i++) {
-            // if we didn't visit this neibour yet in the BFS and he isn't equal to our final node.
+            // if we didn't visit this neibour yet in the BFS and he
+            // isn't equal to our final node.
             if(neighborList[i]->Comparison(*finish)){
                 //otherwise it will not reach the last node i the grid.
                 i++;

@@ -16,11 +16,14 @@ State* StandardCab::move(State* currentPos, vector<Point> route, Grid* grid) {
     int i = 0;
     Point posInRouteVetor;
     vector<Point>::iterator it;
+    // iterate over route
     for (it = route.begin(); it < route.end(); it++, i++) {
         posInRouteVetor.setX(route.at(i).getX());
         posInRouteVetor.setY(route.at(i).getY());
+        // check if we reached our position in route
         if (currentPos->getState().getX() == posInRouteVetor.getX() &&
             currentPos->getState().getY() == posInRouteVetor.getY()) {
+            // advance us by one
             posInRouteVetor.setX(route.at(i + 1).getX());
             posInRouteVetor.setY(route.at(i + 1).getY());
             State *cabNewState = grid->getState(posInRouteVetor.getX(), posInRouteVetor.getY());
@@ -29,20 +32,3 @@ State* StandardCab::move(State* currentPos, vector<Point> route, Grid* grid) {
         }
     }
 }
-
-/*
-
-    // new trip
-    Trip* trip = new Trip(start,rideStart,grid);
-    // use BFS algorithm
-    BFS* bfs = new BFS(trip);
-    // check size of vector of BFS route
-    unsigned int sizeOfSteps = bfs->AlgoRun().size();
-    // get value of final position
-    int x = bfs->getBFSreturn().at(1).getX();
-    int y = bfs->getBFSreturn().at(1).getY();
-    // change the position stored in the cab.
-    State* cabNewState = grid->getState(x,y);
-    setLocation(cabNewState);
-    return  cabNewState;
-}*/

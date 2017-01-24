@@ -1,9 +1,7 @@
 /**
  * The following class hold all operation of the Taxi center
  */
-//gal is the king
-//this is right
-//this is rightright :)
+
 #include "TaxiCenter.h"
 #include "StandardCab.h"
 #include "LuxuryCab.h"
@@ -89,15 +87,9 @@ Driver* TaxiCenter::tripCreator(Trip* trip) {
     trip->setHappening(true);
     // finds closest driver to customer
     driver = waze->findClosest(drivers,start,grid);
-    // creates the route for this taxi using BFS
-    //driver->getTaxiCabInfo()->setRoute(trip);
-    //cab is occupied
+
     driver->setOnTrip(true);
-//    State* driverState = driver->getTaxiCabInfo()->getLocation();
-//    if((driverState->getState().getX() != start->getState().getX()) &&
-//            (driverState->getState().getY() != start->getState().getY())){
-//        driver->getTaxiCabInfo()->move(driverState,start,grid);
-//    }
+
     delete waze;
     return driver;
 }

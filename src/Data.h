@@ -19,7 +19,8 @@ private:
     Driver* driver;
 
 public:
-    Data(int numOfDrivers,TaxiCenter* taxiCenter,int port,Socket* socket,int accept,Driver* driver);
+    Data(int numOfDrivers,TaxiCenter* taxiCenter,int port,
+         Socket* socket,int accept,Driver* driver);
 
     Driver *getDriver();
 

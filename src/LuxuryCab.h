@@ -16,7 +16,7 @@ public:
     LuxuryCab():ITaxiCab(){};
     LuxuryCab(int Cab_ID, int distance_made, Color color, Model model, int coeficient,
               int speed, State* location, bool hasDriver):ITaxiCab(Cab_ID,distance_made,color,
-                                                    model,coeficient,speed,location, hasDriver){} ;
+                                                    model,coeficient,speed,location, hasDriver){};
 
     State* move(State* currentPos, vector<Point> route, Grid* grid);
     friend class boost::serialization::access;

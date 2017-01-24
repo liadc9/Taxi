@@ -16,13 +16,16 @@ State* LuxuryCab::move(State* currentPos, vector<Point> route, Grid* grid) {
     int i = 0;
     Point posInRouteVetor;
     vector<Point>::iterator it;
+    // iterate over route
     for (it = route.begin(); it < route.end(); it++, i++) {
         posInRouteVetor.setX(route.at(i).getX());
         posInRouteVetor.setY(route.at(i).getY());
+        // check if we reached our position in route
         if (currentPos->getState().getX() == posInRouteVetor.getX() &&
             currentPos->getState().getY() == posInRouteVetor.getY()) {
+            // advance us by two unless trip is shorter then advance by one
             int sizeLeft = route.size() - i;
-            if (sizeLeft < 2) {
+            if (sizeLeft <= 2) {
                 posInRouteVetor.setX(route.at(i + 1).getX());
                 posInRouteVetor.setY(route.at(i + 1).getY());
             } else {
@@ -36,30 +39,3 @@ State* LuxuryCab::move(State* currentPos, vector<Point> route, Grid* grid) {
 
     }
 }
-
-/*
-
-    int x;
-    int y;
-    // new trip
-    Trip* trip = new Trip(start,rideStart,grid);
-    // use BFS algorithm
-    BFS* bfs = new BFS(trip);
-    // check size of vector of BFS route
-    unsigned int sizeOfSteps = bfs->AlgoRun().size();
-    // if we can only do one more step and not two
-    if(sizeOfSteps == 2){
-         x = bfs->getBFSreturn().at(1).getX();
-         y = bfs->getBFSreturn().at(1).getY();
-    }
-        //otherwise make a jump of two steps
-    else{
-         x = bfs->getBFSreturn().at(2).getX();
-         y = bfs->getBFSreturn().at(2).getY();
-    }
-    // change the position stored in the cab.
-    State* cabNewState = grid->getState(x,y);
-    setLocation(cabNewState);
-    return cabNewState;
-}
-*/

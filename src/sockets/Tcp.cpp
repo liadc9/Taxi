@@ -156,7 +156,8 @@ int Tcp::sendData(string data, int clientDescriptor) {
 * enter it to the buffer and print the data			       *
 ***********************************************************************/
 int Tcp::receiveData(char* buffer, int size, int clientDescriptor) {
-    ssize_t read_bytes = recv(this->isServer ? clientDescriptor : this->socketDescriptor, buffer, size, 0);
+    ssize_t read_bytes = recv(this->isServer ? clientDescriptor : this->socketDescriptor,
+                              buffer, size, 0);
     //checking the errors
     if (read_bytes <= 0) {
         string host = "";
