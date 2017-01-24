@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
                 client->sendData(serial3_str, 0); // not used on first iteration, is reached at all??? liadddddd
                 serial3_str.clear();
 
-                //recevieng correct new location from server to diserialize
+                //receiving correct new location from server to diserialize
                 client->receiveData(buffer, sizeof(buffer), 0);
                 //deserialize location as point
                 Point *location;
