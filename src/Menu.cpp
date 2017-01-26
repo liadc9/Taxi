@@ -30,6 +30,7 @@
 #include "BFS.h"
 #include "sockets/Tcp.h"
 #include "Data.h"
+#include "ThreadPool.h"
 
 pthread_mutex_t driverMutex;
 pthread_mutex_t taxiMutex;
@@ -103,6 +104,8 @@ void Menu:: online(Grid* grid, int port) {
     pthread_mutex_init(&luxMutex,0);
     pthread_mutex_init(&tripsMutex,0);
     Socket* server = new Tcp(true, port);
+   //
+    ThreadPool pool(5);
     // while program doesn't terminate
     while (choice != 7) {
         // get user input for choice
@@ -154,7 +157,12 @@ void Menu:: online(Grid* grid, int port) {
                                       tariff, timeOfStart, false);
                 pthread_mutex_lock(&tripsMutex);
                 taxiCenter->AddTrip(trip);
+               /* BFS *path = new BFS(trip);
+                pool.addJob(path);
+                */
                 pthread_mutex_unlock(&tripsMutex);
+               // cout << "ff" << endl;
+
                 break;
             }
                 // create a cab
@@ -594,7 +602,7 @@ void* Menu::tripThread(void* info){
                                         pthread_mutex_unlock(&tripsMutex);
                                         z = i;
                                         first++;
-                                        // create a bfs thread for our trip
+                                       // create a bfs thread for our trip
                                         int bfsStatus = pthread_create(&bfsR, NULL,
                                                                        tripRoute, (void *) trip);
                                         if (bfsStatus) {

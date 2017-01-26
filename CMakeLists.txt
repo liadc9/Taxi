@@ -17,10 +17,10 @@ set(core_sockets src/Point.cpp src/Point.h
         src/LuxuryCab.cpp src/LuxuryCab.h src/Map.cpp src/Map.h src/Passenger.cpp src/Passenger.h
         src/StandardCab.cpp src/StandardCab.h src/TaxiCenter.cpp src/TaxiCenter.h
         src/Menu.cpp src/Menu.h src/sockets/Tcp.cpp src/sockets/Tcp.h src/Data.cpp src/Data.h
-        src/sockets/Socket.cpp src/sockets/Socket.h)
+        src/sockets/Socket.cpp src/sockets/Socket.h src/ThreadPool.cpp src/ThreadPool.h)
 
 
-add_executable(Main ${core_sockets} Main.cpp src/ThreadPool.cpp src/ThreadPool.h)
+add_executable(Main ${core_sockets} Main.cpp)
 add_executable(Client ${core_sockets} Client.cpp src/Menu.h)
 
 target_link_libraries(Main ${Boost_LIBRARIES})

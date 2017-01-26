@@ -14,11 +14,11 @@ static void *startJobs(void *arg) {
 void ThreadPool::doJobs() {
     while (!stop) {
         pthread_mutex_lock(&lock);
-        if (!jobs_queue.empty()) {
-            Job* job = jobs_queue.front();
-            jobs_queue.pop();
+        if (!bfs_queue.empty()) {
+            BFS* bfs = bfs_queue.front();
+            bfs_queue.pop();
             pthread_mutex_unlock(&lock);
-            job->execute();
+            bfs->AlgoRun();
         }
         else {
             pthread_mutex_unlock(&lock);
@@ -28,8 +28,8 @@ void ThreadPool::doJobs() {
     pthread_exit(NULL);
 }
 
-void ThreadPool::addJob(Job *job) {
-    jobs_queue.push(job);
+void ThreadPool::addJob(BFS *bfs) {
+    bfs_queue.push(bfs);
 }
 
 ThreadPool::ThreadPool(int threads_num) : threads_num(threads_num), stop(false) {
