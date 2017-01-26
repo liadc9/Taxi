@@ -6,6 +6,7 @@
 #include "State.h"
 #include "Grid.h"
 #include "Trip.h"
+#include "BFS.h"
 
 //constructor
 Trip::Trip(){}
@@ -174,4 +175,13 @@ vector<Point> Trip::getRoute(){
 
 void Trip::setRoute(vector<Point> route) {
     Trip::route = route;
+}
+
+void Trip::doRoute(){
+    Trip* trip = new Trip(ride_id,start,stop,grid,numOfPassengers,tariff,timeOfStart,happening);
+    BFS* bfs = new BFS(trip);
+    vector<Point> route1 = bfs->AlgoRun();
+    route = route1;
+    delete trip;
+    delete bfs;
 }
