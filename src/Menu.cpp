@@ -158,7 +158,6 @@ void Menu:: online(Grid* grid, int port) {
                 pthread_mutex_lock(&tripsMutex);
                 taxiCenter->AddTrip(trip);
                 pool.addJob(trip);
-
                 pthread_mutex_unlock(&tripsMutex);
                 break;
             }
@@ -424,6 +423,9 @@ void* Menu::clientRiciever(void* info){
     center->AddDriver(driver);
     pthread_mutex_unlock(&driverMutex);
     data->setDriver(driver);
+    while (center->getTaxis().empty() && center->getLuxTaxis().empty()){
+
+    }
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getTaxis().size(); i++) {
         if (center->getTaxis().at(i)->getCab_ID() == driver->getId()) {
@@ -610,7 +612,7 @@ void* Menu::tripThread(void* info){
                                         while(trip->getRoute().empty()){
 
                                         }
-                                        cout << "work" << endl;
+                                       // cout << "work" << endl;
                                         pthread_mutex_lock(&tripsMutex);
                                         route = trip->getRoute();
                                         pthread_mutex_unlock(&tripsMutex);
@@ -660,7 +662,7 @@ void* Menu::tripThread(void* info){
                                     while(trip->getRoute().empty()){
 
                                     }
-                                    cout << "work" << endl;
+                                   // cout << "work" << endl;
                                     pthread_mutex_lock(&tripsMutex);
                                     route = trip->getRoute();
                                     pthread_mutex_unlock(&tripsMutex);
