@@ -78,6 +78,9 @@ public:
     void setStop(State *stop);
 
     void setGrid(Grid *grid);
+
+    void doRoute();
+
     friend class boost::serialization::access;
 
     template<class Archive>

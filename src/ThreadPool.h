@@ -7,13 +7,13 @@
 
 #include <queue>
 #include <pthread.h>
-#include "BFS.h"
+#include "Trip.h"
 
 using namespace std;
 
 class ThreadPool {
 private:
-    queue<BFS *> bfs_queue;
+    queue<Trip *> trips_queue;
     int threads_num;
     pthread_t* threads;
     bool stop;
@@ -21,7 +21,7 @@ private:
 public:
     ThreadPool(int threads_num);
     void doJobs();
-    void addJob(BFS *bfs);
+    void addJob(Trip *trip);
     void terminate();
     bool isEmpty();
     virtual ~ThreadPool();

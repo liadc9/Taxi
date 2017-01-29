@@ -157,12 +157,8 @@ void Menu:: online(Grid* grid, int port) {
                                       tariff, timeOfStart, false);
                 pthread_mutex_lock(&tripsMutex);
                 taxiCenter->AddTrip(trip);
-               /* BFS *path = new BFS(trip);
-                pool.addJob(path);
-                */
+                pool.addJob(trip);
                 pthread_mutex_unlock(&tripsMutex);
-               // cout << "ff" << endl;
-
                 break;
             }
                 // create a cab
@@ -427,6 +423,9 @@ void* Menu::clientRiciever(void* info){
     center->AddDriver(driver);
     pthread_mutex_unlock(&driverMutex);
     data->setDriver(driver);
+    while (center->getTaxis().empty() && center->getLuxTaxis().empty()){
+
+    }
     //assign the driver the correct taxi according to Taxi id
     for (int i = 0; i < center->getTaxis().size(); i++) {
         if (center->getTaxis().at(i)->getCab_ID() == driver->getId()) {
@@ -603,12 +602,17 @@ void* Menu::tripThread(void* info){
                                         z = i;
                                         first++;
                                        // create a bfs thread for our trip
-                                        int bfsStatus = pthread_create(&bfsR, NULL,
+                                    /*    int bfsStatus = pthread_create(&bfsR, NULL,
                                                                        tripRoute, (void *) trip);
                                         if (bfsStatus) {
                                             //error
                                         }
-                                        int stat = pthread_join(bfsR, NULL);
+                                        int stat = pthread_join(bfsR, NULL);*/
+                                        //wait till threadPool finish his work
+                                        while(trip->getRoute().empty()){
+
+                                        }
+                                       // cout << "work" << endl;
                                         pthread_mutex_lock(&tripsMutex);
                                         route = trip->getRoute();
                                         pthread_mutex_unlock(&tripsMutex);
@@ -648,12 +652,17 @@ void* Menu::tripThread(void* info){
                                     pthread_mutex_unlock(&tripsMutex);
                                     z = i;
                                     // create a bfs thread for our trip
-                                    int bfsStatus = pthread_create(&bfsR, NULL,
+                             /*       int bfsStatus = pthread_create(&bfsR, NULL,
                                                                    tripRoute, (void *) trip);
                                     if (bfsStatus) {
                                         //error
                                     }
-                                    int stat = pthread_join(bfsR, NULL);
+                                    int stat = pthread_join(bfsR, NULL);*/
+                                    //wait till threadPool finish his work
+                                    while(trip->getRoute().empty()){
+
+                                    }
+                                   // cout << "work" << endl;
                                     pthread_mutex_lock(&tripsMutex);
                                     route = trip->getRoute();
                                     pthread_mutex_unlock(&tripsMutex);
@@ -684,6 +693,7 @@ void* Menu::tripThread(void* info){
                 }
                 // if we are in a trip we need to make movement
                 if (!center->getTrips().empty()) {
+
                     // if the driver is in a trip
                     if (driver->isOnTrip() == true && trip->getTimeOfStart() <= ourTime) {
                         /*
@@ -776,6 +786,7 @@ void* Menu::tripThread(void* info){
             }
             ourTime++;
         }
+
         /**
          * if 7 was pressed we need to quite but if it was in the middle of a trip happening
         we are not sending an empty vector ut a point (-1,-1) to tell us we still

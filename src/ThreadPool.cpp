@@ -5,6 +5,7 @@
 #include "ThreadPool.h"
 #include <unistd.h>
 #include <iostream>
+
 static void *startJobs(void *arg) {
     ThreadPool *pool = (ThreadPool *)arg;
     pool->doJobs();
@@ -14,11 +15,11 @@ static void *startJobs(void *arg) {
 void ThreadPool::doJobs() {
     while (!stop) {
         pthread_mutex_lock(&lock);
-        if (!bfs_queue.empty()) {
-            BFS* bfs = bfs_queue.front();
-            bfs_queue.pop();
+        if (!trips_queue.empty()) {
+            Trip* trip = trips_queue.front();
+            trips_queue.pop();
             pthread_mutex_unlock(&lock);
-            bfs->AlgoRun();
+            trip->doRoute();
         }
         else {
             pthread_mutex_unlock(&lock);
@@ -28,8 +29,8 @@ void ThreadPool::doJobs() {
     pthread_exit(NULL);
 }
 
-void ThreadPool::addJob(BFS *bfs) {
-    bfs_queue.push(bfs);
+void ThreadPool::addJob(Trip *trip) {
+    trips_queue.push(trip);
 }
 
 ThreadPool::ThreadPool(int threads_num) : threads_num(threads_num), stop(false) {
