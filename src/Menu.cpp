@@ -140,14 +140,56 @@ void Menu:: online(Grid* grid, int port) {
                 parsedData = parse.DataSplit(information);
 
                 // handle all info from the parser
+                try{
+                    // check if we received right amount of input
+                    if(parsedData.size() > 8 || parsedData.size() < 8){
+                        throw id;
+                    }
+                    // check if the first id is fine, if any input is bad it will fail here
+                    id = boost::any_cast<int>(parsedData[0]);
+                    if(id < 0){
+                        throw id;
+                    }
+                } catch(int tripError1)
+                {
+                    cout << -1 << "trip middle" << endl;
+                    continue;
+                }
                 id = boost::any_cast<int>(parsedData[0]);
-                xStart = boost::any_cast<int>(parsedData[1]);
-                yStart = boost::any_cast<int>(parsedData[2]);
-                xEnd = boost::any_cast<int>(parsedData[3]);
-                yEnd = boost::any_cast<int>(parsedData[4]);
+                try{
+                    xStart = boost::any_cast<int>(parsedData[1]);
+                    if (xStart >= grid->getHeight() || xStart >= grid->getWidth()){
+                        throw xStart;
+                    }
+                    yStart = boost::any_cast<int>(parsedData[2]);
+                    if (yStart >= grid->getHeight() || yStart >= grid->getWidth()){
+                        throw yStart;
+                    }
+                    xEnd = boost::any_cast<int>(parsedData[3]);
+                    if (xEnd >= grid->getHeight() || xEnd >= grid->getWidth()){
+                        throw xEnd;
+                    }
+                    yEnd = boost::any_cast<int>(parsedData[4]);
+                    if (yEnd >= grid->getHeight() || yEnd >= grid->getWidth()){
+                        throw yEnd;
+                    }
+                } catch (int outOfBounds){
+                    cout << -1 << "yyyy"<< endl;
+                    continue;
+                }
+
                 numPassengers = boost::any_cast<int>(parsedData[5]);
                 tariff = boost::any_cast<double>(parsedData[6]);
-                timeOfStart = boost::any_cast<int>(parsedData[7]);
+                try{
+                    timeOfStart = boost::any_cast<int>(parsedData[7]);
+                    if(timeOfStart == 0){
+                        throw timeOfStart;
+                    }
+                } catch(int tripError2)
+                {
+                    cout << -1 << "trip last" << endl;
+                    continue;
+                }
 
                 State *start = new State(Point(xStart, yStart), NULL, false);
                 State *end = new State(Point(xEnd, yEnd), NULL, false);
@@ -158,6 +200,9 @@ void Menu:: online(Grid* grid, int port) {
                 pthread_mutex_lock(&tripsMutex);
                 taxiCenter->AddTrip(trip);
                 pool.addJob(trip);
+                if(trip->getRoute().empty()){
+                    delete taxiCenter->getTrips().at(taxiCenter->getTrips().size() - 1);
+                }
                 pthread_mutex_unlock(&tripsMutex);
                 break;
             }
@@ -170,44 +215,82 @@ void Menu:: online(Grid* grid, int port) {
                 Color enumColor;
 
                 // get all data from parser accordingly
-                id = boost::any_cast<int>(parsedData[0]);
+                try{
+                    if(parsedData.size() != 4){
+                        throw id;
+                    }
+                    id = boost::any_cast<int>(parsedData[0]);
+                    if(id < 0){
+                        throw id;
+                    }
+                } catch(int cabError)
+                {
+                    cout << -1 << "xxx" << endl;
+                    continue;
+                }
                 taxi_type = boost::any_cast<int>(parsedData[1]);
                 manufacturer = boost::any_cast<char>(parsedData[2]);
                 color = boost::any_cast<char>(parsedData[3]);
 
-                if (manufacturer == 'H') {
-                    enumModel = HONDA;
-                } else if (manufacturer == 'S') {
-                    enumModel = SUBARU;
-                } else if (manufacturer == 'T') {
-                    enumModel = TESLA;
-                } else if (manufacturer == 'F') {
-                    enumModel = FIAT;
+                try{
+                    if (manufacturer == 'H') {
+                        enumModel = HONDA;
+                    } else if (manufacturer == 'S') {
+                        enumModel = SUBARU;
+                    } else if (manufacturer == 'T') {
+                        enumModel = TESLA;
+                    } else if (manufacturer == 'F') {
+                        enumModel = FIAT;
+                    } else {
+                        throw manufacturer;
+                    }
+                } catch (int manufacturError)
+                {
+                    cout << -1 << "cab create" << endl;
+                    continue;
                 }
 
-                if (color == 'R') {
-                    enumColor = RED;
-                } else if (color == 'B') {
-                    enumColor = BLUE;
-                } else if (color == 'G') {
-                    enumColor = GREEN;
-                } else if (color == 'P') {
-                    enumColor = PINK;
-                } else if (color == 'W') {
-                    enumColor = WHITE;
+                try{
+                    if (color == 'R') {
+                        enumColor = RED;
+                    } else if (color == 'B') {
+                        enumColor = BLUE;
+                    } else if (color == 'G') {
+                        enumColor = GREEN;
+                    } else if (color == 'P') {
+                        enumColor = PINK;
+                    } else if (color == 'W') {
+                        enumColor = WHITE;
+                    } else {
+                        throw color;
+                    }
+                } catch (int colorError)
+                {
+                    cout << -1 << "cab create" << endl;
+                    continue;
                 }
+
                 State *location = new State(Point(0, 0), NULL, false);
 
-                // create cab according to the data
-                if (taxi_type == 1) {
-                    StandardCab *cab = new StandardCab(id, 0, enumColor,
-                                                       enumModel, taxi_type, 0, location, false);
-                    taxiCenter->AddTaxiCab(cab);
-                } else {
-                    LuxuryCab *lCab = new LuxuryCab(id, 0, enumColor,
-                                                    enumModel, taxi_type, 0, location, false);
-                    taxiCenter->AddTaxiLux(lCab);
+                try{
+                    // create cab according to the data
+                    if (taxi_type == 1) {
+                        StandardCab *cab = new StandardCab(id, 0, enumColor,
+                                                           enumModel, taxi_type, 0, location, false);
+                        taxiCenter->AddTaxiCab(cab);
+                    } else if (taxi_type == 2){
+                        LuxuryCab *lCab = new LuxuryCab(id, 0, enumColor,
+                                                        enumModel, taxi_type, 0, location, false);
+                        taxiCenter->AddTaxiLux(lCab);
+                    } else {
+                        throw taxi_type;
+                    }
+                } catch (int typeProblem)
+                {
+                    cout << -1 << "another" << endl;
+                    continue;
                 }
+
                 break;
             }
                 //get position of driver
@@ -238,17 +321,37 @@ void Menu:: online(Grid* grid, int port) {
                 // find driver position
                 int cabDriver;
                 cin >> cabDriver;
+                bool exist = false;
                 // get the driver accorind to id.
-                ITaxiCab *cablocate = taxiCenter->getDrivers()
-                        .at((unsigned int) cabDriver)->getTaxiCabInfo();
-                int x = cablocate->getLocation()->getState().getX();
-                int y = cablocate->getLocation()->getState().getY();
+                try{
 
-                Point *pos = new Point(x, y);
+                    for (int i =0; i < taxiCenter->getDrivers().size(); i++){
+                        if(taxiCenter->getDrivers().at(i)->getId() == cabDriver){
+                            exist = true;
+                            break;
+                        }
+                    }
+                    cout << "bq1b" << endl;
 
-                cout << *pos << endl;
+                    if(!exist){
+                        throw exist;
+                    }
+                    ITaxiCab *cablocate = taxiCenter->getDrivers()
+                            .at((unsigned int) cabDriver)->getTaxiCabInfo();
+                    int x = cablocate->getLocation()->getState().getX();
+                    int y = cablocate->getLocation()->getState().getY();
 
-                delete pos;
+                    Point *pos = new Point(x, y);
+
+                    cout << *pos << endl;
+                    delete pos;
+
+                } catch(int printPos)
+                {
+                    cout << -1 << "case 4" << endl;
+                    continue;
+                }
+
                 break;
             }
                 // take all drivers to final trip position
@@ -281,7 +384,10 @@ void Menu:: online(Grid* grid, int port) {
                 timer++;
                 break;
             }
-                // no default requirement
+            default:
+                if(choice != 7){
+                    cout << -1 << endl;
+                }
         }
     }
     /*

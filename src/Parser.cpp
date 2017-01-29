@@ -83,6 +83,12 @@ vector<boost::any> Parser:: DataSplit(string str) {
                 dummy.erase((unsigned long) seperator, dummy.size()-1);
                 dub = atof(dummy.c_str());
                 j = j + dummy.size() - 1;
+            } else {
+                int x = -1;
+                variable = x;
+                info.clear();
+                info.push_back(variable);
+                return info;
             }
         }
         // remove all part of the string we already parsed
