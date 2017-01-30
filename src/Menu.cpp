@@ -200,9 +200,9 @@ void Menu:: online(Grid* grid, int port) {
                 pthread_mutex_lock(&tripsMutex);
                 taxiCenter->AddTrip(trip);
                 pool.addJob(trip);
-                if(trip->getRoute().empty()){
-                    delete taxiCenter->getTrips().at(taxiCenter->getTrips().size() - 1);
-                }
+//                if(trip->getRoute().empty()){
+//                    delete taxiCenter->getTrips().at(taxiCenter->getTrips().size() - 1);
+//                }
                 pthread_mutex_unlock(&tripsMutex);
                 break;
             }
