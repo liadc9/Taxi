@@ -54,7 +54,6 @@ vector<Point> BFS::AlgoRun(){
     // put first node position on grid
     nodeQueue->push((mysearch->getStart()));
     int i = 0;
-    vector<State*> neighborList;
     //this loop will run until we touch the state we want to reach
     while(true){
         path->push(nodeQueue->front());
@@ -62,7 +61,7 @@ vector<Point> BFS::AlgoRun(){
             vector <Point> remainInPlace;
             return remainInPlace;
         }
-        neighborList = mysearch->getGrid()->
+        vector<State*> neighborList = mysearch->getGrid()->
                 get_neighbor(nodeQueue->front(),mysearch->getGrid());
         /*
          * this for loop is used to check if the state position

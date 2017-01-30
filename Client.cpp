@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
     vector<Point> tripRoute;
     // open new socket at correct port
     Socket* client = new Tcp(false, atoi(argv[2]));
+    client->initialize();
 
     // get driver input from user
     string driverString;
@@ -73,47 +74,24 @@ int main(int argc, char *argv[]) {
     Status stat;
 
     // properly receive all data from parser
-    // get all data from parser accordingly
-    try{
-        if(parsedData.size() != 5){
-            throw id;
-        }
-        id = boost::any_cast<int>(parsedData[0]);
-        if(id < 0){
-            throw id;
-        }
-    } catch(int cabError)
-    {
-        cout << -1 << endl;
-        return 0;
-    }
+    id = boost::any_cast<int>(parsedData[0]);
     age = boost::any_cast<int>(parsedData[1]);
     status = boost::any_cast<char>(parsedData[2]);
-    try{
-        if (status == 'S') {
-            stat = Single;
-        } else if (status == 'M') {
-            stat = Marride;
-        } else if (status == 'D') {
-            stat = Divorced;
-        } else if (status == 'W') {
-            stat = Widowed;
-        } else {
-            throw status;
-        }
-    } catch (int statusError)
-    {
-        cout << -1 << endl;
-        return 0;
+
+    if (status == 'S') {
+        stat = Single;
+    } else if (status == 'M') {
+        stat = Marride;
+    } else if (status == 'D') {
+        stat = Divorced;
+    } else if (status == 'W') {
+        stat = Widowed;
     }
 
     expirience = boost::any_cast<int>(parsedData[3]);
     vehicle = boost::any_cast<int>(parsedData[4]);
     double satisfaction = 0;
     taxiID = -1;
-
-    // initialize client
-    client->initialize();
 
     //serialize driver
     Driver *driver = new Driver(id, age, expirience, satisfaction, NULL, stat, NULL, false, taxiID);
@@ -174,7 +152,7 @@ int main(int argc, char *argv[]) {
                 boost::archive::binary_oarchive oa(s);
                 oa << go;
                 s.flush();
-                client->sendData(serial3_str, 0);
+                client->sendData(serial3_str, 0); // not used on first iteration, is reached at all??? liadddddd
                 serial3_str.clear();
 
                 //receiving correct new location from server to diserialize

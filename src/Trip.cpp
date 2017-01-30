@@ -181,9 +181,7 @@ void Trip::doRoute(){
     Trip* trip = new Trip(ride_id,start,stop,grid,numOfPassengers,tariff,timeOfStart,happening);
     BFS* bfs = new BFS(trip);
     vector<Point> route1 = bfs->AlgoRun();
-    //if(!route1.empty()){
-        route = route1;
-    //}
+    route = route1;
     delete trip;
     delete bfs;
 }
