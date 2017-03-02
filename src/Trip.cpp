@@ -168,17 +168,26 @@ bool Trip::getHappening(){
 void Trip::setHappening(bool happening) {
     Trip::happening = happening;
 }
-
+/**
+ * getter for the route member
+ * @return
+ */
 vector<Point> Trip::getRoute(){
     return route;
 }
-
+/**
+ * setter for the route memeber
+ * @param route
+ */
 void Trip::setRoute(vector<Point> route) {
     Trip::route = route;
 }
-
+/**
+ * method that creates route for trip
+ */
 void Trip::doRoute(){
-    Trip* trip = new Trip(ride_id,start,stop,grid,numOfPassengers,tariff,timeOfStart,happening);
+    Trip* trip = new Trip(ride_id, start, stop, grid,
+                          numOfPassengers, tariff, timeOfStart, happening);
     BFS* bfs = new BFS(trip);
     vector<Point> route1 = bfs->AlgoRun();
     route = route1;

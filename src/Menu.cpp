@@ -152,7 +152,7 @@ void Menu:: online(Grid* grid, int port) {
                     }
                 } catch(int tripError1)
                 {
-                    cout << -1 << "trip middle" << endl;
+                    cout << -1 << endl;
                     continue;
                 }
                 id = boost::any_cast<int>(parsedData[0]);
@@ -174,7 +174,7 @@ void Menu:: online(Grid* grid, int port) {
                         throw yEnd;
                     }
                 } catch (int outOfBounds){
-                    cout << -1 << "yyyy"<< endl;
+                    cout << -1 << endl;
                     continue;
                 }
 
@@ -187,7 +187,7 @@ void Menu:: online(Grid* grid, int port) {
                     }
                 } catch(int tripError2)
                 {
-                    cout << -1 << "trip last" << endl;
+                    cout << -1 << endl;
                     continue;
                 }
 
@@ -197,7 +197,6 @@ void Menu:: online(Grid* grid, int port) {
                 // create trip according to all info
                 Trip *trip = new Trip(id, start, end, grid, numPassengers,
                                       tariff, timeOfStart, false);
-
                 pool.addJob(trip);
                 sleep(3);
                 if(trip->getRoute().empty()){
@@ -228,7 +227,7 @@ void Menu:: online(Grid* grid, int port) {
                     }
                 } catch(int cabError)
                 {
-                    cout << -1 << "xxx" << endl;
+                    cout << -1 << endl;
                     continue;
                 }
                 taxi_type = boost::any_cast<int>(parsedData[1]);
@@ -249,7 +248,7 @@ void Menu:: online(Grid* grid, int port) {
                     }
                 } catch (int manufacturError)
                 {
-                    cout << -1 << "cab create" << endl;
+                    cout << -1 << endl;
                     continue;
                 }
 
@@ -269,7 +268,7 @@ void Menu:: online(Grid* grid, int port) {
                     }
                 } catch (int colorError)
                 {
-                    cout << -1 << "cab create" << endl;
+                    cout << -1 << endl;
                     continue;
                 }
 
@@ -290,7 +289,7 @@ void Menu:: online(Grid* grid, int port) {
                     }
                 } catch (int typeProblem)
                 {
-                    cout << -1 << "another" << endl;
+                    cout << -1 << endl;
                     continue;
                 }
 
@@ -324,19 +323,18 @@ void Menu:: online(Grid* grid, int port) {
                 // find driver position
                 int cabDriver;
                 cin >> cabDriver;
-                bool exist = false;
+                int exist = 0;
                 // get the driver accorind to id.
                 try{
 
                     for (int i =0; i < taxiCenter->getDrivers().size(); i++){
                         if(taxiCenter->getDrivers().at(i)->getId() == cabDriver){
-                            exist = true;
+                            exist = 1;
                             break;
                         }
                     }
-                    cout << "bq1b" << endl;
 
-                    if(!exist){
+                    if(exist == 0){
                         throw exist;
                     }
                     ITaxiCab *cablocate = taxiCenter->getDrivers()
@@ -351,7 +349,7 @@ void Menu:: online(Grid* grid, int port) {
 
                 } catch(int printPos)
                 {
-                    cout << -1 << "case 4" << endl;
+                    cout << -1 << endl;
                     continue;
                 }
 
@@ -423,6 +421,7 @@ void Menu:: online(Grid* grid, int port) {
     while(!acceptVect.empty()){
 
     }
+    pool.terminate();
         // remove all taxis from memory if 7 is pressed
         for (int i = taxiCenter->getTaxis().size(); i > 0; i--) {
             StandardCab *cab = taxiCenter->getTaxis().at(i - 1);

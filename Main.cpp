@@ -46,57 +46,100 @@ BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
 int main(int argc, char *argv[]) {
     int port = atoi(argv[1]);
     char buffer[65536];
+    bool input = false;
+    Grid *grid;
 
-    // get grid input from user
-    string gridInput;
-    getline (cin, gridInput);
-    int xSize;
-    int ySize;
-    int xObstacle;
-    int yObstacle;
+    while(!input) {
+        // get grid input from user
+        string gridInput;
+        getline (cin, gridInput);
+        int xSize;
+        int ySize;
+        int xObstacle;
+        int yObstacle;
 
-    // creates new parser object
-    Parser parse;
+        // creates new parser object
+        Parser parse;
 
-    // create a list of int data
-    vector<boost::any> parsedData;
+        // create a list of int data
+        vector<boost::any> parsedData;
 
-    // parse grid info
-    parsedData = parse.DataSplit(gridInput);
+        // parse grid info
+        parsedData = parse.DataSplit(gridInput);
 
-    // creates list for grid coordinates
-    vector<Point*> parsedPoints;
+        // creates list for grid coordinates
+        vector<Point*> parsedPoints;
 
-    //enters the data for grid size to be understandable.
-    xSize = boost::any_cast<int>(parsedData[0]);
-    ySize = boost::any_cast<int>(parsedData[1]);
+        // loops as long as data isn't valid
 
-    // grid creation:
-    Grid* grid = new Grid(xSize, ySize);
+        try {
+            //enters the data for grid size to be understandable.
+            xSize = boost::any_cast<int>(parsedData[0]);
 
-    // get number of obstacles
-    char obstacles;
-    cin.get(obstacles);
-    int numOfObstacles = ((int) obstacles - 48);
-    // to ignore white space
-    cin.ignore();
-    if(numOfObstacles > 0){
-        // for each obstacle:
+            if (xSize <= 0) {
+                gridInput.clear();
+                throw xSize;
+            }
 
-        for(int i = 0; i < numOfObstacles; i++){
-            //an obstacle string
-            string object;
-            getline (cin, object);
+            ySize = boost::any_cast<int>(parsedData[1]);
 
-            vector<boost::any> parsedObstacle;
-            parsedObstacle = parse.DataSplit(object);
+            if (ySize <= 0) {
+                throw ySize;
+            }
 
-            xObstacle = boost::any_cast<int>(parsedObstacle[0]);
-            yObstacle = boost::any_cast<int>(parsedObstacle[1]);
-            // set the grid position to hold an obstacle.
-            grid->getState(xObstacle, yObstacle)->setIsObstacle(1);
+        } catch (int x) {
+            cout << -1 << endl;
+            continue;
         }
+
+        // get number of obstacles
+        char obstacles;
+        cin.get(obstacles);
+        if(!isdigit(obstacles)){
+            cout << -1 << endl;
+            gridInput.clear();
+            cin.ignore();
+            continue;
+        }
+        // grid creation:
+        grid = new Grid(xSize, ySize);
+        int numOfObstacles = ((int) obstacles - 48);
+        // to ignore white space
+        cin.ignore();
+        try {
+            if (numOfObstacles > 0) {
+                // for each obstacle:
+
+                for (int i = 0; i < numOfObstacles; i++) {
+                    //an obstacle string
+                    string object;
+                    getline(cin, object);
+
+                    vector<boost::any> parsedObstacle;
+                    parsedObstacle = parse.DataSplit(object);
+
+                    xObstacle = boost::any_cast<int>(parsedObstacle[0]);
+                    if (xObstacle < 0) {
+                        throw xObstacle;
+                    }
+                    yObstacle = boost::any_cast<int>(parsedObstacle[1]);
+                    if (yObstacle < 0) {
+                        throw yObstacle;
+                    }
+                    // set the grid position to hold an obstacle.
+                    grid->getState(xObstacle, yObstacle)->setIsObstacle(1);
+                }
+            } else {
+                throw numOfObstacles;
+            }
+        } catch (int y) {
+            cout << -1 << endl;
+            continue;
+        }
+        input = true;
+
     }
+
     // call the menu for different input options
     Menu* menu = new Menu();
     menu->online(grid, port);
